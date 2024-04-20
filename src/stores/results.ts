@@ -1,25 +1,24 @@
 import { createStore } from 'zustand/vanilla'
 
 export type CounterState = {
-  count: number,
-  status: string
+  status: string,
+  decks: string[]
 }
 
 export type CounterActions = {
-  decrementCount: () => void
-  incrementCount: () => void
   setStatus: (status: string) => void
+  setDecks: (decks: string[]) => void
 }
 
 export type CounterStore = CounterState & CounterActions
 
 export const initCounterStore = (): CounterState => {
-  return { count: new Date().getFullYear(), status: 'idle'}
+  return {  status: 'idle', decks: []}
 }
 
 export const defaultInitState: CounterState = {
-  count: 0,
-  status: 'idle'
+  status: 'idle',
+  decks: []
 }
 
 export const createCounterStore = (
@@ -27,8 +26,7 @@ export const createCounterStore = (
 ) => {
   return createStore<CounterStore>()((set) => ({
     ...initState,
-    decrementCount: () => set((state) => ({ count: state.count - 1 })),
-    incrementCount: () => set((state) => ({ count: state.count + 1 })),
     setStatus: (status: string) => set(() => ({ status })),
+    setDecks: (decks: string[]) => set(() => ({ decks }))
   }))
 }

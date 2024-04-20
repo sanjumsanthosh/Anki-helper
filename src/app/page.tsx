@@ -1,5 +1,5 @@
 import Wrapper from "@/components/wrapper";
-import ShowStatus from "./ShowStatus";
+import ShowOptions from "./ShowOptions";
 import DisplayResults from "./DisplayResults";
 
 export default function Home() {
@@ -10,7 +10,7 @@ export default function Home() {
       <section className="flex h-screen w-full flex-col justify-between p-9 lg:h-auto">
         <Wrapper>
           <div className="mx-auto flex max-w-sm flex-col justify-between">
-            <ShowStatus />
+            <ShowOptions />
           </div>
         </Wrapper>
       </section>
