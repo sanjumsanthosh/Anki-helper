@@ -13,11 +13,11 @@ export type CounterActions = {
 export type CounterStore = CounterState & CounterActions
 
 export const initCounterStore = (): CounterState => {
-  return {  status: 'idle', decks: []}
+  return {  status: JSON.stringify({status: 'Waiting for user input... ⁉️',}), decks: []}
 }
 
 export const defaultInitState: CounterState = {
-  status: 'idle',
+  status: JSON.stringify({status: 'Waiting for user input... ⁉️',}),
   decks: []
 }
 
