@@ -1,3 +1,4 @@
+import { MainNav } from "@/app/main-nav";
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
 
@@ -13,6 +14,8 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
             >
             <span className="">Helper</span>
             </span>
+            <MainNav className="mx-6" />
+            
         </div>
         </div>
         {children}
