@@ -3,7 +3,7 @@
 import { useCounterStore } from "@/provider/result-provider";
 
 export default function DisplayResults() {
-    const { count, status} = useCounterStore(
+    const {  status} = useCounterStore(
         (state) => state,
       )
     return (

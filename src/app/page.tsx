@@ -1,6 +1,7 @@
 import Wrapper from "@/components/wrapper";
-import ShowStatus from "./ShowStatus";
+import ShowOptions from "./ShowOptions";
 import DisplayResults from "./DisplayResults";
+import CodeSyntaxHighlighter from "./CodeSyntaxHighlighter";
 
 export default function Home() {
 
@@ -9,16 +10,15 @@ export default function Home() {
     <section className="flex flex-col lg:flex-row">
       <section className="flex h-screen w-full flex-col justify-between p-9 lg:h-auto">
         <Wrapper>
-          <div className="mx-auto flex max-w-sm flex-col justify-between">
-            <ShowStatus />
+          <div className="mx-auto flex flex-col">
+            <ShowOptions />
           </div>
         </Wrapper>
       </section>
 
-      {/* second half */}
 
       <section className="lg:flex h-screen w-full flex-col justify-center items-center bg-[#d6ebe9] p-9">
-        <DisplayResults />
+        <CodeSyntaxHighlighter />
       </section>
     </section>
   );
