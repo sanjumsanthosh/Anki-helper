@@ -50,6 +50,8 @@ export default function TextAreadAddForm() {
         } else {
             try {
                 setNotes(parseAnkiNote(data.text));
+                setIsValid(true);
+                setStatus(JSON.stringify(notes, null, 2));
             } catch (error) {
                 console.log(typeof error === 'object');
                 console.log(typeof error);
@@ -62,16 +64,16 @@ export default function TextAreadAddForm() {
                     setStatus(JSON.stringify({error: "Got error when parsing"}, null, 2));
                 }
             }
-            if (notes.length > 0) {
-                setIsValid(true);
-                setStatus(JSON.stringify(notes, null, 2));
-            }
             
         }
     }
 
 
     const onClear = () => {
+        if (isValid) {
+            setIsValid(false);
+            return;
+        }
         form.reset();
         setIsValid(false);
         setNotes([]);
@@ -90,6 +92,7 @@ export default function TextAreadAddForm() {
                             <FormLabel>Text</FormLabel>
                             <FormControl>
                                 <Textarea
+                                    disabled={isValid}
                                     placeholder="text"
                                 {...field}
                                 />
@@ -102,7 +105,7 @@ export default function TextAreadAddForm() {
                     {isValid ? "Add" : "Validate"}
                 </Button>
                 <Button type="reset" className='my-4 mx-5' variant="destructive">
-                   Clear
+                    {isValid ? "Cancel" : "Clear"}
                 </Button>
             </form>
         </Form>
