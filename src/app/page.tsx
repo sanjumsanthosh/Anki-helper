@@ -1,7 +1,7 @@
 import Wrapper from "@/components/wrapper";
 import ShowOptions from "./ShowOptions";
-import DisplayResults from "./DisplayResults";
 import CodeSyntaxHighlighter from "./CodeSyntaxHighlighter";
+import SelectDeck from "./SelectDeck";
 
 export default function Home() {
 

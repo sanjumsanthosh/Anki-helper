@@ -1,15 +1,15 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { DeckNames, DeckNamesAndIds, FindNotes, NotesInfo } from "@/const/ankiActions";
 import { RequestBuilder } from "@/lib/fetchUtils";
 import { useCounterStore } from "@/provider/result-provider";
 import { Label } from "@radix-ui/react-label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@radix-ui/react-select";
-import { Input } from "postcss";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {z} from "zod";
+import CardAddForm from "./CardAddForm";
+import TextAreadAddForm from "./TextAreadAddForm";
+import { Switch } from "@/components/ui/switch";
 
 const ButtonTableItem = z.object({
     name: z.string(),
@@ -19,9 +19,11 @@ const ButtonTableItem = z.object({
 
 
 export default function ShowOptions() {
-    const {setDecks,setStatus  } = useCounterStore(
+    const {setDecks,setStatus, deck , setHealthy  } = useCounterStore(
         (state) => state,
       )
+
+    const [mode, setMode] = useState(true);
 
     const GetAllDecks = async () => {
         try {
@@ -29,12 +31,12 @@ export default function ShowOptions() {
             const builder = await RequestBuilder.create<DeckNames>()
                 .setAction(action)
                 .performAction();
-            
             if (builder.isSuccessful()) {
                 const responseAction = builder.getResponseAction();
                 console.log(responseAction.names); 
                 setDecks(responseAction.names);
                 setStatus(JSON.stringify(responseAction.names));
+                setHealthy(true);
             }
         } catch (error) {
             console.error(error); 
@@ -62,7 +64,7 @@ export default function ShowOptions() {
     const GetAllNotes = async () => {
         try {
             const action = FindNotes.createFindNotes();
-            action.setDeck("ML Terminologies");
+            action.setDeck(deck);
             const builder = await RequestBuilder.create<FindNotes>()
                 .setAction(action)
                 .performAction();
@@ -80,7 +82,7 @@ export default function ShowOptions() {
         try {
             const action = NotesInfo.createNotesInfo();
             const findNotes = FindNotes.createFindNotes();
-            findNotes.setDeck("ML Terminologies");
+            findNotes.setDeck(deck);
             const builder = await RequestBuilder.create<FindNotes>()
                 .setAction(findNotes)
                 .performAction();
@@ -131,11 +133,20 @@ export default function ShowOptions() {
     
     return (
         <div className="flex flex-col">
-        {DeckGroup.map((item, index) => {
-            return (
-                <DisplayCard key={index} name={item.name} onClick={item.onClick} description={item.description} />
-            )
-        })}
+            <div className="flex items-center space-x-2">
+                <Switch id="airplane-mode" checked={mode} onCheckedChange={setMode}/>
+                <Label htmlFor="airplane-mode">
+                    Card Mode
+                </Label>
+            </div>
+            { mode && <CardAddForm /> }
+            {!mode && <TextAreadAddForm />}
+            <hr className="my-5" />
+            {DeckGroup.map((item, index) => {
+                return (
+                    <DisplayCard key={index} name={item.name} onClick={item.onClick} description={item.description} />
+                )
+            })}
         </div>
     );
 }

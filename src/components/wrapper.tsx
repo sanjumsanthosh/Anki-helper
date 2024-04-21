@@ -1,6 +1,18 @@
+import AnkiLogo from "@/app/AnkiLogo";
+import SelectDeck from "@/app/SelectDeck";
 import { MainNav } from "@/app/main-nav";
+import { cookies } from "next/headers";
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
+    const cookieStore = cookies()
+    const currentDeck = cookieStore.get('deck');
+
+    async function setDeckInCookies(deck: string) {
+        "use server";
+        console.log("Setting deck in cookies", deck);
+        cookies().set("deck", deck);
+      }
+
 
     return (
     <>
@@ -8,14 +20,9 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
         <div
             className={`flex items-center text-2xl font-bold dark:text-white`}
         >
-            Anki.{" "}
-            <span
-            className={`text-sm font-bold group ml-2 inline-block rounded-3xl bg-[#fafafa] px-3 text-black`}
-            >
-            <span className="">Helper</span>
-            </span>
+            <AnkiLogo />
             <MainNav className="mx-6" />
-            
+            <SelectDeck currentDeck={currentDeck?.value} setDeckInCookies={setDeckInCookies}/>
         </div>
         </div>
         {children}
