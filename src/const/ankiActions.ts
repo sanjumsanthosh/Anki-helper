@@ -6,7 +6,8 @@ enum ACTION {
     GET_DECKS = 'getDecks',
     DECK_NAMES_AND_IDS = "deckNamesAndIds",
     FIND_NOTES = "findNotes",
-    NOTES_INFO = "notesInfo"
+    NOTES_INFO = "notesInfo",
+    ADD_NOTES = "addNotes"
 }
 
 class AnkiAction {
@@ -202,5 +203,70 @@ class NotesInfo extends AnkiAction {
     }
 }
 
+const QANote = z.object({
+    front: z.string(),
+    back: z.string(),
+});
 
-export { ACTION, AnkiAction, DeckNames, GetDecks, DeckNamesAndIds , FindNotes , NotesInfo, NotesInfoResult}
+interface NoteType {
+    deckName: string
+    modelName: string
+    fields: {
+        Front: string
+        Back: string
+    }
+    tags: string[]
+}
+
+class AddNotes extends AnkiAction {
+
+    deckName: string
+    params: {notes: NoteType[]} = {
+        notes: []
+    }
+    result: number[]
+
+    static createAddNotes() {
+        return new AddNotes()
+    }
+
+    constructor() {
+        super()
+        this.action = ACTION.ADD_NOTES
+        this.version = 6
+        this.deckName = ""
+        this.result = []
+    }
+
+    setDeckName(deckName: string) {
+        this.deckName = deckName
+        return this
+    }
+
+    addQANotes(notes: z.infer<typeof QANote>[]) {
+        notes.forEach((note) => {
+            this.params.notes.push({
+                deckName: this.deckName,
+                modelName: "Basic",
+                fields: {
+                    Front: note.front,
+                    Back: note.back
+                },
+                tags: ["anki-helper"]
+            })
+        })
+        return this
+    }
+
+    getAllNoteInfo(): number[] {
+        return this.result
+    }
+
+    parseResponse(response: string) {
+        const data = JSON.parse(response)
+        if (data.error) return
+        this.result = data.result
+    }
+}
+
+export { ACTION, AnkiAction, DeckNames, GetDecks, DeckNamesAndIds , FindNotes , NotesInfo, NotesInfoResult, AddNotes, QANote }
