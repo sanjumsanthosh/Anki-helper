@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { AddNotes } from '@/const/ankiActions';
 import { RequestBuilder } from '@/lib/fetchUtils';
 import { useCounterStore } from '@/provider/result-provider';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function CardAddForm() {
 
@@ -97,7 +98,7 @@ export default function CardAddForm() {
                         <FormItem>
                             <FormLabel>Back</FormLabel>
                             <FormControl>
-                                <Input placeholder="back" {...field} />
+                                <Textarea placeholder="back" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
