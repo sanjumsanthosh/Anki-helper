@@ -12,10 +12,10 @@ export function MainNav({
       {...props}
     >
       <Link
-        href="/"
+        href="/gpt-reading-list"
         className="text-sm font-medium transition-colors hover:text-primary"
       >
-        Column1
+        GPT
       </Link>
       <Link
         href="/"
