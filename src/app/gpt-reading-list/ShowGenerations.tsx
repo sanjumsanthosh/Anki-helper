@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import {z} from 'zod';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
+import { Label } from '@/components/ui/label';
 
 
 const DBRecord = z.object({
@@ -27,6 +28,30 @@ export default function ShowGenerations() {
         const data = await response.json();
         setGenerations(data);
         setLoading(false);
+    }
+
+    const markAsRead = async (id: string) => {
+        const response = await fetch(`http://140.245.24.43:8083/db/mark?id=${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer a3vOHZzMwg)yj*_b',
+            }
+        });
+        const data = await response.json();
+        getGenerations();
+    }
+
+    const markAsUnread = async (id: string) => {
+        const response = await fetch(`http://140.245.24.43:8083/db/mark/unread?id=${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer a3vOHZzMwg)yj*_b',
+            }
+        });
+        const data = await response.json();
+        getGenerations();
     }
 
     useEffect(() => {
@@ -62,8 +87,12 @@ export default function ShowGenerations() {
                                 </div>
                             </CardContent>
                             <CardFooter className="flex justify-between">
-                                <Button variant="outline" disabled>Cancel</Button>
-                                <Button disabled>Deploy</Button>
+                                <Label htmlFor="framework">Tags: {generation.tags} | {generation.id}</Label>
+                                {
+                                    generation.read 
+                                    ? <Button variant="destructive" onClick={()=>markAsUnread(generation.id)}>Mark unread</Button>
+                                    : <Button variant="success" onClick={()=>markAsRead(generation.id)}>Mark read</Button>
+                                }
                             </CardFooter>
                         </Card>
                     )
