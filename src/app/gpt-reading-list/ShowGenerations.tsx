@@ -32,25 +32,13 @@ export default function ShowGenerations() {
 
     const markAsRead = async (id: string) => {
         const response = await fetch(`http://140.245.24.43:8083/db/mark?id=${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer a3vOHZzMwg)yj*_b',
-            }
         });
-        const data = await response.json();
         getGenerations();
     }
 
     const markAsUnread = async (id: string) => {
         const response = await fetch(`http://140.245.24.43:8083/db/mark/unread?id=${id}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer a3vOHZzMwg)yj*_b',
-            }
         });
-        const data = await response.json();
         getGenerations();
     }
 
