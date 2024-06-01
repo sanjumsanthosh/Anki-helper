@@ -52,40 +52,39 @@ export default function ShowGenerations() {
 
     return (
         <div>
-            <h1>Generations</h1>
-                {generations.map((generation, index) => {
-                    return (
-                        <Card key={index} className="w-full m-4 py-2">
-                            <CardHeader>
-                                <CardTitle>
-                                    <CardDescription>
-                                        <Link href={generation.url} className="text-lg">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl">Generations</h1>
+            {generations.map((generation, index) => {
+                return (
+                    <Card key={index} className="w-full m-2 sm:m-4 py-2">
+                        <CardHeader>
+                            <CardTitle>
+                                <CardDescription>
+                                    <Link href={generation.url} className="text-sm sm:text-base md:text-lg">
                                         {generation.url}
-                                        </Link>
-                                    </CardDescription>
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="grid w-full items-center gap-4">
-                                    <div className="flex flex-col space-y-1.5">
-                                        <ReactMarkdown className="leading-loose tracking-wide">
-                                            {generation.data}
-                                        </ReactMarkdown>
-                                    </div>
+                                    </Link>
+                                </CardDescription>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid w-full items-center gap-2 sm:gap-4">
+                                <div className="flex flex-col space-y-1 sm:space-y-1.5">
+                                    <ReactMarkdown className="leading-tight sm:leading-normal tracking-tighter sm:tracking-normal">
+                                        {generation.data}
+                                    </ReactMarkdown>
                                 </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-between">
-                                <Label htmlFor="framework">Tags: {generation.tags} | {generation.id}</Label>
-                                {
-                                    generation.read 
-                                    ? <Button variant="destructive" onClick={()=>markAsUnread(generation.id)}>Mark unread</Button>
-                                    : <Button variant="success" onClick={()=>markAsRead(generation.id)}>Mark read</Button>
-                                }
-                            </CardFooter>
-                        </Card>
-                    )
-                }
-            )}
+                            </div>
+                        </CardContent>
+                        <CardFooter className="flex flex-col sm:flex-row justify-between">
+                            <Label htmlFor="framework" className="mb-2 sm:mb-0">Tags: {generation.tags} | {generation.id}</Label>
+                            {
+                                generation.read 
+                                ? <Button variant="destructive" onClick={()=>markAsUnread(generation.id)}>Mark unread</Button>
+                                : <Button variant="success" onClick={()=>markAsRead(generation.id)}>Mark read</Button>
+                            }
+                        </CardFooter>
+                    </Card>
+                )
+            })}
         </div>
     )
 }
