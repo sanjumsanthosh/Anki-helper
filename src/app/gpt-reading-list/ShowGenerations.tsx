@@ -38,7 +38,7 @@ const mapExistingTags = (tags: string) => {
     return options.filter(option => tagsArray.includes(option.value));
 }
 
-const getBorderStyle = (tags: string) => {
+const getBorderColor = (tags: string) => {
     const tagsArray = tags.split(',');
     const optionsArray = options.filter(option => tagsArray.includes(option.value));
 
@@ -46,11 +46,11 @@ const getBorderStyle = (tags: string) => {
         return;
     }
     if (optionsArray.length === 1) {
-        return `border-[${optionsArray[0].color}]`;
+        return optionsArray[0].color;
     }
     const colors = optionsArray.map(option => option.color);
     const mix = chroma.average(colors);
-    return `border-[${mix}]`;
+    return mix.css();
 
 }
 
@@ -171,7 +171,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
 function CardWithTags({generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef}: {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>}) {
     const [selectedTags, setSelectedTags] = useState(generation.tags);
 
-    return (<Card key={index} className={`m-2 py-2 ${getBorderStyle(selectedTags)}`}>
+    return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(selectedTags)}}>
             <CardHeader>
                 <CardTitle>
                     <CardDescription>
@@ -200,6 +200,7 @@ function CardWithTags({generation, index, markAsRead, markAsUnread, updateServer
                         isMulti
                         options={options}
                         styles={customStyles}
+                        isSearchable={false}
                         defaultValue={mapExistingTags(generation.tags)}
                         onChange={(selectedValue) => {
                             updateServerTags(generation.id, selectedValue.map(value => value.value));
