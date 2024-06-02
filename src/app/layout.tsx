@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={myFont.className}>
         <Provider attribute="class" defaultTheme="system" enableSystem>
           <main
-            className={`text-zinc-700 bg-white dark:text-zinc-400 dark:bg-black overflow-y-auto`}          >
+            className={`text-zinc-700 bg-white dark:text-zinc-400 dark:bg-black md:w-auto sm:w-full`} >
             {children}
           </main>
         </Provider>

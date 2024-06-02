@@ -16,7 +16,7 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
 
     return (
     <>
-        <div className="flex w-full items-center justify-between">
+        <div className="flex w-screen items-center justify-between">
         <div
             className={`flex items-center text-2xl font-bold dark:text-white`}
         >
