@@ -17,28 +17,25 @@ const DBRecord = z.object({
     tags: z.string()
 })
 
-export default function ShowGenerations() {
+export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread}) {
 
 
     const [generations, setGenerations] = useState<z.infer<typeof DBRecord>[]>([]);
     const [loading, setLoading] = useState(true);
 
     const getGenerations = async () => {
-        const response = await fetch('http://140.245.24.43:8083/db');
-        const data = await response.json();
-        setGenerations(data);
+        const response = await getServerGenerations();
+        setGenerations(response);
         setLoading(false);
     }
 
     const markAsRead = async (id: string) => {
-        const response = await fetch(`http://140.245.24.43:8083/db/mark?id=${id}`, {
-        });
+        const response = await setServerMarkAsRead(id);
         getGenerations();
     }
 
     const markAsUnread = async (id: string) => {
-        const response = await fetch(`http://140.245.24.43:8083/db/mark/unread?id=${id}`, {
-        });
+        const response = await setServerMarkAsUnread(id);
         getGenerations();
     }
 
