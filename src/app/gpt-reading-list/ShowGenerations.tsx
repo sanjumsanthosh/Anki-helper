@@ -55,20 +55,20 @@ export default function ShowGenerations() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl">Generations</h1>
             {generations.map((generation, index) => {
                 return (
-                    <Card key={index} className="w-screen m-2 py-2">
+                    <Card key={index} className="m-2 py-2">
                         <CardHeader>
                             <CardTitle>
                                 <CardDescription>
-                                    <Link href={generation.url} className="text-sm sm:text-base md:text-lg">
+                                    <Link href={generation.url} className="text-sm sm:text-base md:text-lg w-5">
                                         {generation.url}
                                     </Link>
                                 </CardDescription>
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="grid w-full items-center gap-2 sm:gap-4">
+                            <div className="grid items-center gap-2 sm:gap-4">
                                 <div className="flex flex-col space-y-1 sm:space-y-1.5">
-                                    <ReactMarkdown className="leading-tight sm:leading-normal tracking-tighter sm:tracking-normal">
+                                    <ReactMarkdown className="overflow-auto leading-tight sm:leading-normal tracking-tighter sm:tracking-normal whitespace-normal">
                                         {generation.data}
                                     </ReactMarkdown>
                                 </div>
