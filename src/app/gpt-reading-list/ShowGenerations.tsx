@@ -55,7 +55,7 @@ export default function ShowGenerations() {
             <h1 className="text-2xl sm:text-3xl md:text-4xl">Generations</h1>
             {generations.map((generation, index) => {
                 return (
-                    <Card key={index} className="w-full m-2 sm:m-4 py-2">
+                    <Card key={index} className="w-screen m-2 py-2">
                         <CardHeader>
                             <CardTitle>
                                 <CardDescription>
