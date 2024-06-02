@@ -17,7 +17,13 @@ const DBRecord = z.object({
     tags: z.string()
 })
 
-export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread}) {
+interface ServerGenerationsType {
+    getServerGenerations: () => Promise<z.infer<typeof DBRecord>[]>;
+    setServerMarkAsRead: (id: string) => Promise<void>;
+    setServerMarkAsUnread: (id: string) => Promise<void>;
+}
+
+export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread}: ServerGenerationsType) {
 
 
     const [generations, setGenerations] = useState<z.infer<typeof DBRecord>[]>([]);
