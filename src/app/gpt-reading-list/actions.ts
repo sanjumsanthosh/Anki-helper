@@ -1,10 +1,10 @@
 'use server';
 
 // const URL = "http://140.245.24.43:8083";
-const URL = "http://localhost:8083";
+const apiEndpoint = process.env.API_ENDPOINT || "http://localhost:8083";
 
 const getServerURL = (path: string) => {
-    return `${URL}${path}`;
+    return `${apiEndpoint}${path}`;
 }
 
 
