@@ -155,23 +155,25 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
             <h1 className="text-2xl sm:text-3xl md:text-4xl">Generations</h1>
             {generations.map((generation, index) => {
                 return <CardWithTags 
-                            key={index}
-                            generation={generation} 
-                            index={index} 
-                            markAsRead={markAsRead} 
-                            markAsUnread={markAsUnread} 
-                            updateServerTags={updateServerTags} 
-                            tagSelectRef={tagSelectRef}
-                            />
+                    key={index}
+                    generation={generation}
+                    index={index}
+                    markAsRead={markAsRead}
+                    markAsUnread={markAsUnread}
+                    updateServerTags={updateServerTags}
+                    tagSelectRef={tagSelectRef}
+                    setGenerations={setGenerations}
+                    generations={generations}                            />
             })}
         </div>
     )
 }
 
-function CardWithTags({generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef}: {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>}) {
-    const [selectedTags, setSelectedTags] = useState(generation.tags);
+function CardWithTags(
+    {generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations}:
+     {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: z.infer<typeof DBRecord>[]}) {
 
-    return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(selectedTags)}}>
+    return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(generation.tags)}}>
             <CardHeader>
                 <CardTitle>
                     <CardDescription>
@@ -201,11 +203,19 @@ function CardWithTags({generation, index, markAsRead, markAsUnread, updateServer
                         options={options}
                         styles={customStyles}
                         isSearchable={false}
-                        defaultValue={mapExistingTags(generation.tags)}
                         onChange={(selectedValue) => {
                             updateServerTags(generation.id, selectedValue.map(value => value.value));
-                            setSelectedTags(selectedValue.map(value => value.value).join(','));
+                            setGenerations(generations.map(generationItem => {
+                                if (generationItem.id === generation.id) {
+                                    return {
+                                        ...generationItem,
+                                        tags: selectedValue.map(value => value.value).join(',')
+                                    }
+                                }
+                                return generationItem;
+                            }))
                         }}
+                        value={mapExistingTags(generation.tags)}
                     />
                     | {generation.id}
                 </Label>
