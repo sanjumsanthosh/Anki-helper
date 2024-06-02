@@ -6,6 +6,10 @@ import {z} from 'zod';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
+import Select, { StylesConfig } from 'react-select'
+import chroma from "chroma-js";
+import React from 'react';
+
 
 
 const DBRecord = z.object({
@@ -17,17 +21,106 @@ const DBRecord = z.object({
     tags: z.string()
 })
 
+// use light colors as the background is dark
+const options = [
+    { value: 'explore', label: 'Explore' , color: '#FF5630'},
+    { value: 'add2anki', label: 'Add to Anki' , color: '#FFC400'},
+  ]
+
+const optionType = z.object({
+    value: z.string(),
+    label: z.string(),
+    color: z.string()
+})
+
+const mapExistingTags = (tags: string) => {
+    const tagsArray = tags.split(',');
+    return options.filter(option => tagsArray.includes(option.value));
+}
+
+const getBorderStyle = (tags: string) => {
+    const tagsArray = tags.split(',');
+    const optionsArray = options.filter(option => tagsArray.includes(option.value));
+
+    if (optionsArray.length === 0) {
+        return;
+    }
+    if (optionsArray.length === 1) {
+        return `border-[${optionsArray[0].color}]`;
+    }
+    const colors = optionsArray.map(option => option.color);
+    const mix = chroma.average(colors);
+    return `border-[${mix}]`;
+
+}
+
+const customStyles: StylesConfig<z.infer<typeof optionType>, true> = {
+    control: (styles) => ({ ...styles, backgroundColor: 'transparent',border: 'none', color: '#FFFFFF'}),
+    option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+    const color = chroma(data.color);
+      return {
+        ...styles,
+        backgroundColor: isDisabled
+          ? undefined
+          : isSelected
+          ? data.color
+          : isFocused
+          ? color.alpha(0.1).css()
+          : undefined,
+        color: isDisabled
+          ? '#ccc'
+          : isSelected
+          ? chroma.contrast(color, 'white') > 2
+            ? 'white'
+            : 'black'
+          : data.color,
+        cursor: isDisabled ? 'not-allowed' : 'default',
+  
+        ':active': {
+          ...styles[':active'],
+          backgroundColor: !isDisabled
+            ? isSelected
+              ? data.color
+              : color.alpha(0.3).css()
+            : undefined,
+        },
+      };
+    },
+    multiValue: (styles, { data }) => {
+      const color = chroma(data.color);
+      return {
+        ...styles,
+        backgroundColor: color.alpha(0.1).css(),
+      };
+    },
+    multiValueLabel: (styles, { data }) => ({
+      ...styles,
+      color: data.color,
+    }),
+    multiValueRemove: (styles, { data }) => ({
+      ...styles,
+      color: data.color,
+      ':hover': {
+        backgroundColor: data.color,
+        color: 'white',
+      },
+    }),
+  };
+
 interface ServerGenerationsType {
     getServerGenerations: () => Promise<z.infer<typeof DBRecord>[]>;
     setServerMarkAsRead: (id: string) => Promise<void>;
     setServerMarkAsUnread: (id: string) => Promise<void>;
+    updateServerTags: (id: string, tags: string[]) => Promise<void>;
 }
 
-export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread}: ServerGenerationsType) {
+export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags}: ServerGenerationsType) {
 
 
     const [generations, setGenerations] = useState<z.infer<typeof DBRecord>[]>([]);
     const [loading, setLoading] = useState(true);
+    
+    const tagSelectRef = React.createRef<any>();
 
     const getGenerations = async () => {
         const response = await getServerGenerations();
@@ -45,6 +138,10 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         getGenerations();
     }
 
+    
+
+    
+
     useEffect(() => {
         getGenerations();
     }   , [])
@@ -57,37 +154,66 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl">Generations</h1>
             {generations.map((generation, index) => {
-                return (
-                    <Card key={index} className="m-2 py-2">
-                        <CardHeader>
-                            <CardTitle>
-                                <CardDescription>
-                                    <Link href={generation.url} className="text-sm sm:text-base md:text-lg w-5">
-                                        {generation.url}
-                                    </Link>
-                                </CardDescription>
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid items-center gap-2 sm:gap-4">
-                                <div className="flex flex-col space-y-1 sm:space-y-1.5">
-                                    <ReactMarkdown className="overflow-auto leading-tight sm:leading-normal tracking-tighter sm:tracking-normal whitespace-normal">
-                                        {generation.data}
-                                    </ReactMarkdown>
-                                </div>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col sm:flex-row justify-between">
-                            <Label htmlFor="framework" className="mb-2 sm:mb-0">Tags: {generation.tags} | {generation.id}</Label>
-                            {
-                                generation.read 
-                                ? <Button variant="destructive" onClick={()=>markAsUnread(generation.id)}>Mark unread</Button>
-                                : <Button variant="success" onClick={()=>markAsRead(generation.id)}>Mark read</Button>
-                            }
-                        </CardFooter>
-                    </Card>
-                )
+                return <CardWithTags 
+                            key={index}
+                            generation={generation} 
+                            index={index} 
+                            markAsRead={markAsRead} 
+                            markAsUnread={markAsUnread} 
+                            updateServerTags={updateServerTags} 
+                            tagSelectRef={tagSelectRef}
+                            />
             })}
         </div>
     )
+}
+
+function CardWithTags({generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef}: {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>}) {
+    const [selectedTags, setSelectedTags] = useState(generation.tags);
+
+    return (<Card key={index} className={`m-2 py-2 ${getBorderStyle(selectedTags)}`}>
+            <CardHeader>
+                <CardTitle>
+                    <CardDescription>
+                        <Link href={generation.url} className="text-sm sm:text-base md:text-lg w-5">
+                            {generation.url}
+                        </Link>
+                    </CardDescription>
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <div className="grid items-center gap-2 sm:gap-4">
+                    <div className="flex flex-col space-y-1 sm:space-y-1.5">
+                        <ReactMarkdown className="overflow-auto leading-tight sm:leading-normal tracking-tighter sm:tracking-normal whitespace-normal">
+                            {generation.data}
+                        </ReactMarkdown>
+                    </div>
+                </div>
+            </CardContent>
+            <CardFooter className="flex flex-col sm:flex-row justify-between">
+                
+                <Label htmlFor="framework" className="mb-2 sm:mb-0 flex flex-row items-center sp">
+                    Tags:
+                    <Select
+                        closeMenuOnSelect={false}
+                        ref={tagSelectRef}
+                        isMulti
+                        options={options}
+                        styles={customStyles}
+                        defaultValue={mapExistingTags(generation.tags)}
+                        onChange={(selectedValue) => {
+                            updateServerTags(generation.id, selectedValue.map(value => value.value));
+                            setSelectedTags(selectedValue.map(value => value.value).join(','));
+                        }}
+                    />
+                    | {generation.id}
+                </Label>
+                
+                {
+                    generation.read 
+                    ? <Button variant="destructive" onClick={()=>markAsUnread(generation.id)}>Mark unread</Button>
+                    : <Button variant="success" onClick={()=>markAsRead(generation.id)}>Mark read</Button>
+                }
+            </CardFooter>
+        </Card>);
 }
