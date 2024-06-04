@@ -36,11 +36,21 @@ const updateServerTags = async (id: string, tags: string[]) => {
     });
 }
 
+const cleanAll = async () => {
+    const response = await fetch(getServerURL(`/db/clean`), {
+        method: "DELETE",
+        headers: {
+            "Authorization" : `Bearer ${process.env.API_PASSWORD}`
+        }
+    });
+}
+
 
 
 export {
     getServerGenerations,
     setServerMarkAsRead,
     setServerMarkAsUnread,
-    updateServerTags
+    updateServerTags,
+    cleanAll
 }

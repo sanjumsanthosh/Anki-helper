@@ -6,7 +6,7 @@ export default function AnkiLogo() {
 
     const { health, setHealthy } = useCounterStore((state) => state);
     return (
-        <>
+        <div className="w-50">
             Anki<span 
                 className={ health ? "text-green-500" : "text-red-500"}
             >.</span>{" "}
@@ -15,7 +15,7 @@ export default function AnkiLogo() {
             >
             <span className="">Helper</span>
             </span>
-        </>
+        </div>
         
     );
 }

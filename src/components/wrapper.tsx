@@ -16,14 +16,14 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
 
     return (
     <>
-        <div className="flex w-full items-center justify-between">
-        <div
-            className={`flex items-center text-2xl font-bold dark:text-white`}
-        >
-            <AnkiLogo />
-            <MainNav className="mx-6" />
-            <SelectDeck currentDeck={currentDeck?.value} setDeckInCookies={setDeckInCookies}/>
-        </div>
+        <div className="flex items-center justify-between w-full h-full">
+            <div
+                className={`flex items-center justify-between text-2xl font-bold dark:text-white w-full`}
+            >
+                <AnkiLogo />
+                <MainNav className="mx-6" />
+                <SelectDeck currentDeck={currentDeck?.value} setDeckInCookies={setDeckInCookies}/>
+            </div>
         </div>
         {children}
         

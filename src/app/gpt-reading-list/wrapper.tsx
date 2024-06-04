@@ -2,6 +2,8 @@ import AnkiLogo from "@/app/AnkiLogo";
 import SelectDeck from "@/app/SelectDeck";
 import { MainNav } from "@/app/main-nav";
 import { cookies } from "next/headers";
+import CleanAll from "./CleanAll";
+import { cleanAll } from "./actions";
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
     const cookieStore = cookies()
@@ -16,11 +18,12 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
 
     return (
     <>
-        <div className="flex w-screen items-center justify-between">
+        <div className="flex w-full items-center justify-between">
         <div
-            className={`flex items-center text-2xl font-bold dark:text-white`}
+            className={`flex items-center text-2xl font-bold dark:text-white w-full justify-between`}
         >
             <AnkiLogo />
+            <CleanAll cleanAll={cleanAll} />
         </div>
         </div>
         {children}
