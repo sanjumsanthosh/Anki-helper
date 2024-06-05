@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import Select, { StylesConfig } from 'react-select'
 import chroma from "chroma-js";
 import React from 'react';
-import codeScreenshot from 'remark-code-screenshot'
 
 
 const DBRecord = z.object({
@@ -194,7 +193,6 @@ function CardWithTags(
                 <div className="grid items-center gap-2 sm:gap-4">
                     <div className="flex flex-col space-y-1 sm:space-y-1.5">
                         <ReactMarkdown 
-                            remarkPlugins={[codeScreenshot]}
                             className=" w-full max-w-full
                             overflow-auto leading-tight sm:leading-normal 
                             tracking-tighter sm:tracking-normal whitespace-normal text-xl">
