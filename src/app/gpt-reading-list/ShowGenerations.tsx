@@ -152,7 +152,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
 
     return (
         <div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl">Generations</h1>
+            <h1 className="text-2xl">Generations</h1>
             {generations.map((generation, index) => {
                 return <CardWithTags 
                     key={index}
@@ -173,11 +173,18 @@ function CardWithTags(
     {generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations}:
      {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: z.infer<typeof DBRecord>[]}) {
 
-    return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(generation.tags)}}>
+
+    const getBackgroundColor = (read: number) => {
+        return read ? '#1f1219' : 'inherit';
+    }
+    
+    return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(generation.tags),
+        background: getBackgroundColor(generation.read)
+    }}>
             <CardHeader>
                 <CardTitle>
                     <CardDescription>
-                        <Link href={generation.url} className="text-sm sm:text-base md:text-lg w-5">
+                        <Link href={generation.url} className="text-md sm:text-base md:text-lg w-5" target='_blank'>
                             {generation.url}
                         </Link>
                     </CardDescription>
@@ -186,7 +193,9 @@ function CardWithTags(
             <CardContent>
                 <div className="grid items-center gap-2 sm:gap-4">
                     <div className="flex flex-col space-y-1 sm:space-y-1.5">
-                        <ReactMarkdown className="overflow-auto leading-tight sm:leading-normal tracking-tighter sm:tracking-normal whitespace-normal">
+                        <ReactMarkdown 
+                            className="overflow-auto leading-tight sm:leading-normal 
+                            tracking-tighter sm:tracking-normal whitespace-normal text-xl">
                             {generation.data}
                         </ReactMarkdown>
                     </div>

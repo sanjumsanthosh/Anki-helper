@@ -1,5 +1,7 @@
 'use server';
 
+import { z } from "zod";
+
 // const URL = "http://140.245.24.43:8083";
 const apiEndpoint = process.env.API_ENDPOINT || "http://localhost:8083";
 
@@ -26,9 +28,6 @@ const setServerMarkAsUnread = async (id: string) => {
     });
 }
 
-//         if (url.pathname === "/db/tag" && req.method === "POST") {
-    // const tags = url.searchParams.get("tags") || "";
-    // const id = url.searchParams.get("id");
 
 const updateServerTags = async (id: string, tags: string[]) => {
     const response = await fetch(getServerURL(`/db/tag?id=${id}&tags=${tags.join(",")}`), {
@@ -46,11 +45,39 @@ const cleanAll = async () => {
 }
 
 
+const statType = z.object({
+    rows: z.object({
+        count: z.number()
+    }),
+    readRows: z.object({
+        count: z.number()
+    }),
+    unreadRows: z.object({
+        count: z.number()
+    }),
+    sizeInMB: z.string(),
+    readRowsButWithTags: z.object({
+        count: z.number()
+    }),
+    readRowsButWithoutTags: z.object({
+        count: z.number()
+    })
+})
+
+
+const getStats = async () => {
+    const response = await fetch(getServerURL(`/db/stats`));
+    let data = await response.json();
+    return statType.parse(data);
+}
+
 
 export {
     getServerGenerations,
     setServerMarkAsRead,
     setServerMarkAsUnread,
     updateServerTags,
-    cleanAll
+    cleanAll,
+    getStats,
+    type statType
 }
