@@ -175,7 +175,7 @@ function CardWithTags(
 
 
     const getBackgroundColor = (read: number) => {
-        return read ? '#1f1219' : 'inherit';
+        return read ? '#140c0c' : 'inherit';
     }
     
     return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(generation.tags),
