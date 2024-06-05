@@ -178,7 +178,7 @@ function CardWithTags(
         return read ? '#140c0c' : 'inherit';
     }
     
-    return (<Card key={index} className={`m-2 py-2`} style={{borderColor: getBorderColor(generation.tags),
+    return (<Card key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(generation.tags),
         background: getBackgroundColor(generation.read)
     }}>
             <CardHeader>
@@ -194,7 +194,8 @@ function CardWithTags(
                 <div className="grid items-center gap-2 sm:gap-4">
                     <div className="flex flex-col space-y-1 sm:space-y-1.5">
                         <ReactMarkdown 
-                            className="overflow-auto leading-tight sm:leading-normal 
+                            className=" w-full
+                            overflow-auto leading-tight sm:leading-normal 
                             tracking-tighter sm:tracking-normal whitespace-normal text-xl">
                             {generation.data}
                         </ReactMarkdown>
