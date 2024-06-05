@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import Select, { StylesConfig } from 'react-select'
 import chroma from "chroma-js";
 import React from 'react';
+import { tagListType } from './actions';
 
 
 const DBRecord = z.object({
@@ -21,10 +22,10 @@ const DBRecord = z.object({
 })
 
 // use light colors as the background is dark
-const options = [
-    { value: 'explore', label: 'Explore' , color: '#FF5630'},
-    { value: 'add2anki', label: 'Add to Anki' , color: '#FFC400'},
-  ]
+// const options = [
+//     { value: 'explore', label: 'Explore' , color: '#FF5630'},
+//     { value: 'add2anki', label: 'Add to Anki' , color: '#FFC400'},
+//   ]
 
 const optionType = z.object({
     value: z.string(),
@@ -32,14 +33,20 @@ const optionType = z.object({
     color: z.string()
 })
 
-const mapExistingTags = (tags: string) => {
+const mapExistingTags = (options: tagListType, tags: string) => {
     const tagsArray = tags.split(',');
-    return options.filter(option => tagsArray.includes(option.value));
+    return options.filter(option => tagsArray.includes(option.tag)).map(option => {
+        return {
+            value: option.tag,
+            label: option.label,
+            color: option.color
+        }
+    });
 }
 
-const getBorderColor = (tags: string) => {
+const getBorderColor = (options: tagListType,tags: string) => {
     const tagsArray = tags.split(',');
-    const optionsArray = options.filter(option => tagsArray.includes(option.value));
+    const optionsArray = options.filter(option => tagsArray.includes(option.tag));
 
     if (optionsArray.length === 0) {
         return;
@@ -111,12 +118,14 @@ interface ServerGenerationsType {
     setServerMarkAsRead: (id: string) => Promise<void>;
     setServerMarkAsUnread: (id: string) => Promise<void>;
     updateServerTags: (id: string, tags: string[]) => Promise<void>;
+    getTagList: () => Promise<tagListType>;
 }
 
-export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags}: ServerGenerationsType) {
+export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList}: ServerGenerationsType) {
 
 
     const [generations, setGenerations] = useState<z.infer<typeof DBRecord>[]>([]);
+    const [tagList, setTagList] = useState<tagListType>([]);
     const [loading, setLoading] = useState(true);
     
     const tagSelectRef = React.createRef<any>();
@@ -125,6 +134,11 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         const response = await getServerGenerations();
         setGenerations(response);
         setLoading(false);
+    }
+
+    const processTagList = async () => {
+        const response = await getTagList();
+        setTagList(response);
     }
 
     const markAsRead = async (id: string) => {
@@ -139,11 +153,11 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
 
     
 
-    
-
     useEffect(() => {
         getGenerations();
+        processTagList();
     }   , [])
+    
 
     if (loading) {
         return <h1>Loading...</h1>
@@ -162,22 +176,33 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
                     updateServerTags={updateServerTags}
                     tagSelectRef={tagSelectRef}
                     setGenerations={setGenerations}
-                    generations={generations}                            />
+                    generations={generations}
+                    tagList={tagList}                            />
             })}
         </div>
     )
 }
 
 function CardWithTags(
-    {generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations}:
-     {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: z.infer<typeof DBRecord>[]}) {
+    {generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations, tagList}:
+     {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: z.infer<typeof DBRecord>[], tagList: tagListType}) {
 
 
     const getBackgroundColor = (read: number) => {
         return read ? '#140c0c' : 'inherit';
     }
+
+    const getOptions = (tagList: tagListType) => {
+        return tagList.map(tag => {
+            return {
+                value: tag.tag,
+                label: tag.label,
+                color: tag.color
+            }
+        })
+    }
     
-    return (<Card key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(generation.tags),
+    return (<Card key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(tagList, generation.tags),
         background: getBackgroundColor(generation.read)
     }}>
             <CardHeader>
@@ -209,7 +234,7 @@ function CardWithTags(
                         closeMenuOnSelect={false}
                         ref={tagSelectRef}
                         isMulti
-                        options={options}
+                        options={getOptions(tagList)}
                         styles={customStyles}
                         isSearchable={false}
                         onChange={(selectedValue) => {
@@ -224,7 +249,7 @@ function CardWithTags(
                                 return generationItem;
                             }))
                         }}
-                        value={mapExistingTags(generation.tags)}
+                        value={mapExistingTags(tagList, generation.tags)}
                     />
                     | {generation.id}
                 </Label>

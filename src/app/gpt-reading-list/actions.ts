@@ -65,10 +65,27 @@ const statType = z.object({
 })
 
 
+
 const getStats = async () => {
     const response = await fetch(getServerURL(`/db/stats`));
     let data = await response.json();
     return statType.parse(data);
+}
+
+const tagListType = z.array(z.object({
+    id: z.number(),
+    tag: z.string(),
+    additionalJsonDetails: z.string(),
+    groupTags: z.string(),
+    label: z.string(),
+    color: z.string()
+}))
+
+
+const getTagList = async () => {
+    const response = await fetch(getServerURL(`/tag`));
+    let data = await response.json();
+    return tagListType.parse(data);
 }
 
 
@@ -78,7 +95,9 @@ export {
     setServerMarkAsUnread,
     updateServerTags,
     cleanAll,
-    getStats
+    getStats,
+    getTagList
 }
 
 export type statType = z.infer<typeof statType>;
+export type tagListType = z.infer<typeof tagListType>;

@@ -1,5 +1,5 @@
 import ShowGenerations from "./ShowGenerations";
-import { getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags } from "./actions";
+import { getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList } from "./actions";
 import Wrapper from "./wrapper";
 
 
@@ -14,6 +14,7 @@ export default function GPTReadingList() {
                         setServerMarkAsRead={setServerMarkAsRead}
                         setServerMarkAsUnread={setServerMarkAsUnread}
                         updateServerTags={updateServerTags}
+                        getTagList={getTagList}
                         />
                 </div>
             </Wrapper>
