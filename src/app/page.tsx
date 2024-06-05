@@ -7,7 +7,7 @@ export default function Home() {
 
   
   return (
-    <section className="flex flex-col lg:flex-row">
+    <section className="flex flex-col lg:flex-row w-screen">
       <section className="flex min-h-full w-full flex-col justify-between p-9 lg:h-auto">
         <Wrapper>
           <div className="mx-auto flex flex-col">
