@@ -1,26 +1,19 @@
 import AnkiLogo from "@/app/AnkiLogo";
-import SelectDeck from "@/app/SelectDeck";
-import { MainNav } from "@/app/main-nav";
-import { cookies } from "next/headers";
+import CleanAll from "./CleanAll";
+import { cleanAll, getStats } from "./actions";
+import Stats from "./Stats";
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
-    const cookieStore = cookies()
-    const currentDeck = cookieStore.get('deck');
-
-    async function setDeckInCookies(deck: string) {
-        "use server";
-        console.log("Setting deck in cookies", deck);
-        cookies().set("deck", deck);
-      }
-
 
     return (
     <>
-        <div className="flex w-screen items-center justify-between">
+        <div className="flex w-full items-center justify-between">
         <div
-            className={`flex items-center text-2xl font-bold dark:text-white`}
+            className={`flex items-center font-bold dark:text-white w-full justify-between text-xl`}
         >
             <AnkiLogo />
+            <Stats stats={getStats} />
+            <CleanAll cleanAll={cleanAll} />
         </div>
         </div>
         {children}
@@ -28,3 +21,4 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
     </>
     );
 }
+

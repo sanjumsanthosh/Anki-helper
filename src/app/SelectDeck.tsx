@@ -29,19 +29,20 @@ export default function SelectDeck({ currentDeck, setDeckInCookies}: DeckProps) 
     }
 
     return (
-
-        <Select onValueChange={setDeck} value={deck} >
-            <SelectTrigger>
-                <SelectValue placeholder="Select a deck" />
-            </SelectTrigger>
-            <SelectContent>
-                {decks.map((deck) => (
-                    <SelectItem key={deck} value={deck} onSelect={() => setDeck(deck)}>
-                        {deck}
-                    </SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+        <div className="w-50">
+            <Select onValueChange={setDeck} value={deck}>
+                <SelectTrigger>
+                    <SelectValue placeholder="Select a deck" />
+                </SelectTrigger>
+                <SelectContent>
+                    {decks.map((deck) => (
+                        <SelectItem key={deck} value={deck} onSelect={() => setDeck(deck)}>
+                            {deck}
+                        </SelectItem>
+                    ))}
+                </SelectContent>
+            </Select>
+        </div>
 
     );
 

@@ -23,18 +23,7 @@ export function MainNav({
       >
         Column2
       </Link>
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Column3
-      </Link>
-      <Link
-        href="/"
-        className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
-      >
-        Column4
-      </Link>
+      
     </nav>
   )
 }
