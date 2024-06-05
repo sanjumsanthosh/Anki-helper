@@ -194,7 +194,7 @@ function CardWithTags(
                 <div className="grid items-center gap-2 sm:gap-4">
                     <div className="flex flex-col space-y-1 sm:space-y-1.5">
                         <ReactMarkdown 
-                            className=" w-full
+                            className=" w-full max-w-full
                             overflow-auto leading-tight sm:leading-normal 
                             tracking-tighter sm:tracking-normal whitespace-normal text-xl">
                             {generation.data}
