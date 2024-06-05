@@ -78,6 +78,7 @@ export {
     setServerMarkAsUnread,
     updateServerTags,
     cleanAll,
-    getStats,
-    type statType
+    getStats
 }
+
+export type statType = z.infer<typeof statType>;
