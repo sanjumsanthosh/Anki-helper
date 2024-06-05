@@ -31,13 +31,30 @@ export default function Stats( {stats} : StatsProps) {
     }
 
     return (
-    <div className="flex items-center p-4 rounded-lg">
-        <Label className="mr-2 bg-blue-700 text-white px-2 py-1 rounded">Total Rows: {data?.rows.count}</Label>
-        <Label className="mr-2 bg-green-700 text-white px-2 py-1 rounded">Unread/Read: {data?.unreadRows.count}/{data?.readRows.count}</Label>
-        <Label className="mr-2 bg-blue-700 text-white px-2 py-1 rounded">Size: {data?.sizeInMB}</Label>
-        <Label className="mr-2 bg-green-700 text-white px-2 py-1 rounded">Read with tags: {data?.readRowsButWithTags.count}</Label>
-        <IoIosRefreshCircle onClick={refreshData} className={`ml-4 cursor-pointer text-green-500 w-8 h-8 ${loading ? 'animate-spin' : ''}`} />
-    </div>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 p-4 rounded-lg">
+            <Label onClick={refreshData} className="mr-2 bg-blue-700 text-white px-2 py-1 rounded">
+                <span className="hidden md:inline">Total Rows: </span>
+                <span className="md:hidden">T: </span>
+                {data?.rows.count}
+            </Label>
+            <Label onClick={refreshData} className="mr-2 bg-green-700 text-white px-2 py-1 rounded">
+                <span className="hidden md:inline">Unread/Read: </span>
+                <span className="md:hidden">UR/R: </span>
+                {data?.unreadRows.count}/{data?.readRows.count}
+            </Label>
+            <Label onClick={refreshData} className="mr-2 bg-blue-700 text-white px-2 py-1 rounded">
+                <span className="hidden md:inline">Size: </span>
+                <span  className="md:hidden">Sz: </span>
+                {data?.sizeInMB}
+            </Label>
+            <Label onClick={refreshData} className="mr-2 bg-green-700 text-white px-2 py-1 rounded">
+                <span className="hidden md:inline">Read with tags: </span>
+                <span className="md:hidden">RT: </span>
+                {data?.readRowsButWithTags.count}
+            </Label>
+            <IoIosRefreshCircle onClick={refreshData} className={`hidden md:inline ml-4 cursor-pointer text-green-500 w-8 h-8 ${loading ? 'animate-spin' : ''}`} />
+        
+        </div>
     );
 }
 
