@@ -140,10 +140,6 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
         processTagList();
     }, [])
 
-    React.useEffect(() => {
-        console.log(columnFilters);
-    }, [columnFilters])
-
 
     const table = useReactTable({
       data,

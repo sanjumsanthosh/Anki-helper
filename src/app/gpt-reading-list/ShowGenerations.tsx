@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
+import { LegacyRef, useEffect, useRef, useState } from 'react';
 import {z} from 'zod';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
@@ -115,6 +115,8 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     const [generations, setGenerations] = useState<DBRecordType[]>([]);
     const [tagList, setTagList] = useState<tagListType>([]);
     const [loading, setLoading] = useState(true);
+
+    const refs = useRef<{ [key: string]: React.RefObject<any> }>({});
     
     const tagSelectRef = React.createRef<any>();
 
@@ -138,13 +140,22 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         const response = await setServerMarkAsUnread(id);
         getGenerations();
     }
-
     
+    useEffect(() => {
+        generations.forEach(generation => {
+            if (!refs.current[generation.id]) {
+                refs.current[generation.id] = React.createRef();
+            }
+        });
+        if (gotoID && refs.current[gotoID] && refs.current[gotoID].current) {
+            refs.current[gotoID].current.scrollIntoView({behavior: 'smooth'});
+        }
+    }, [generations, refs, gotoID])
 
     useEffect(() => {
         getGenerations();
         processTagList();
-    }   , [])
+    }   , [gotoID])
     
 
     if (loading) {
@@ -156,6 +167,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
             <h1 className="text-2xl">Generations</h1>
             {generations.map((generation, index) => {
                 return <CardWithTags 
+                    refer={refs.current[generation.id]}
                     key={index}
                     generation={generation}
                     index={index}
@@ -172,8 +184,8 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
 }
 
 function CardWithTags(
-    {generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations, tagList}:
-     {generation: DBRecordType, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: DBRecordType[], tagList: tagListType}) {
+    {refer, generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations, tagList}:
+     {refer: LegacyRef<HTMLDivElement>,generation: DBRecordType, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: DBRecordType[], tagList: tagListType}) {
 
 
     const getBackgroundColor = (read: number) => {
@@ -189,10 +201,10 @@ function CardWithTags(
             }
         })
     }
-    
-    return (<Card key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(tagList, generation.tags),
-        background: getBackgroundColor(generation.read)
-    }}>
+    return (
+        <Card ref={refer} key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(tagList, generation.tags),
+            background: getBackgroundColor(generation.read)
+        }}>
             <CardHeader>
                 <CardTitle>
                     <CardDescription>
