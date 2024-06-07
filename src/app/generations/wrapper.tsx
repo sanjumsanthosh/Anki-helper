@@ -1,8 +1,5 @@
 import AnkiLogo from "@/app/AnkiLogo";
-import CleanAll from "./CleanAll";
 import { MainNav } from "@/app/main-nav";
-import { cleanAll, getStats } from "../actions";
-import Stats from "./Stats";
 
 export default function Wrapper({ children }: { children: React.ReactNode }) {
 
@@ -14,8 +11,6 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
         >
             <AnkiLogo />
             <MainNav className="mx-6" />
-            <Stats stats={getStats} />
-            <CleanAll cleanAll={cleanAll} />
         </div>
         </div>
         {children}

@@ -9,23 +9,10 @@ import { Label } from '@/components/ui/label';
 import Select, { StylesConfig } from 'react-select'
 import chroma from "chroma-js";
 import React from 'react';
-import { tagListType } from './actions';
+import { DBRecordType, tagListType } from '../actions';
+import { useSearchParams } from 'next/navigation';
 
 
-const DBRecord = z.object({
-    id: z.string(),
-    url: z.string(),
-    data: z.string(),
-    date: z.string(),
-    read: z.number(),
-    tags: z.string()
-})
-
-// use light colors as the background is dark
-// const options = [
-//     { value: 'explore', label: 'Explore' , color: '#FF5630'},
-//     { value: 'add2anki', label: 'Add to Anki' , color: '#FFC400'},
-//   ]
 
 const optionType = z.object({
     value: z.string(),
@@ -114,7 +101,7 @@ const customStyles: StylesConfig<z.infer<typeof optionType>, true> = {
   };
 
 interface ServerGenerationsType {
-    getServerGenerations: () => Promise<z.infer<typeof DBRecord>[]>;
+    getServerGenerations: () => Promise<DBRecordType[]>;
     setServerMarkAsRead: (id: string) => Promise<void>;
     setServerMarkAsUnread: (id: string) => Promise<void>;
     updateServerTags: (id: string, tags: string[]) => Promise<void>;
@@ -123,8 +110,9 @@ interface ServerGenerationsType {
 
 export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList}: ServerGenerationsType) {
 
-
-    const [generations, setGenerations] = useState<z.infer<typeof DBRecord>[]>([]);
+    const searchParam = useSearchParams();
+    const gotoID = searchParam.get('id');
+    const [generations, setGenerations] = useState<DBRecordType[]>([]);
     const [tagList, setTagList] = useState<tagListType>([]);
     const [loading, setLoading] = useState(true);
     
@@ -185,7 +173,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
 
 function CardWithTags(
     {generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations, tagList}:
-     {generation: z.infer<typeof DBRecord>, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: z.infer<typeof DBRecord>[], tagList: tagListType}) {
+     {generation: DBRecordType, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: DBRecordType[], tagList: tagListType}) {
 
 
     const getBackgroundColor = (read: number) => {
@@ -261,4 +249,9 @@ function CardWithTags(
                 }
             </CardFooter>
         </Card>);
+}
+
+
+export {
+    getBorderColor
 }

@@ -64,6 +64,15 @@ const statType = z.object({
     })
 })
 
+const DBRecord = z.object({
+    id: z.string(),
+    url: z.string(),
+    data: z.string(),
+    date: z.string(),
+    read: z.number(),
+    tags: z.string()
+})
+
 
 
 const getStats = async () => {
@@ -101,3 +110,4 @@ export {
 
 export type statType = z.infer<typeof statType>;
 export type tagListType = z.infer<typeof tagListType>;
+export type DBRecordType = z.infer<typeof DBRecord>;

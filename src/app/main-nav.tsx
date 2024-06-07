@@ -18,10 +18,10 @@ export function MainNav({
         GPT
       </Link>
       <Link
-        href="/"
+        href="/generations"
         className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
       >
-        Column2
+        Table
       </Link>
       
     </nav>

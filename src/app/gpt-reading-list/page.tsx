@@ -1,5 +1,5 @@
 import ShowGenerations from "./ShowGenerations";
-import { getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList } from "./actions";
+import { getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList } from "../actions";
 import Wrapper from "./wrapper";
 
 
