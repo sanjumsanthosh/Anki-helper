@@ -1,6 +1,7 @@
 import ShowGenerations from "./ShowGenerations";
 import { getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList } from "../actions";
 import Wrapper from "./wrapper";
+import { Suspense } from "react";
 
 
 export default function GPTReadingList() {
@@ -9,6 +10,7 @@ export default function GPTReadingList() {
         <section className="flex h-full flex-col justify-between p-9 lg:h-auto">
             <Wrapper>
                 <div className="mx-auto flex flex-col">
+                  <Suspense>
                     <ShowGenerations 
                         getServerGenerations={getServerGenerations}
                         setServerMarkAsRead={setServerMarkAsRead}
@@ -16,6 +18,7 @@ export default function GPTReadingList() {
                         updateServerTags={updateServerTags}
                         getTagList={getTagList}
                         />
+                    </Suspense>
                 </div>
             </Wrapper>
         </section>
