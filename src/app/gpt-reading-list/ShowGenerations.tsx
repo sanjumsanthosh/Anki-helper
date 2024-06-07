@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { LegacyRef, useEffect, useRef, useState } from 'react';
+import { LegacyRef, Suspense, useEffect, useRef, useState } from 'react';
 import {z} from 'zod';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
@@ -163,23 +163,26 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     }
 
     return (
-        <div>
-            <h1 className="text-2xl">Generations</h1>
-            {generations.map((generation, index) => {
-                return <CardWithTags 
-                    refer={refs.current[generation.id]}
-                    key={index}
-                    generation={generation}
-                    index={index}
-                    markAsRead={markAsRead}
-                    markAsUnread={markAsUnread}
-                    updateServerTags={updateServerTags}
-                    tagSelectRef={tagSelectRef}
-                    setGenerations={setGenerations}
-                    generations={generations}
-                    tagList={tagList}                            />
-            })}
-        </div>
+        <Suspense>
+            <div>
+                <h1 className="text-2xl">Generations</h1>
+                {generations.map((generation, index) => {
+                    return <CardWithTags 
+                        refer={refs.current[generation.id]}
+                        key={index}
+                        generation={generation}
+                        index={index}
+                        markAsRead={markAsRead}
+                        markAsUnread={markAsUnread}
+                        updateServerTags={updateServerTags}
+                        tagSelectRef={tagSelectRef}
+                        setGenerations={setGenerations}
+                        generations={generations}
+                        tagList={tagList}                            />
+                })}
+            </div>
+        </Suspense>
+        
     )
 }
 
