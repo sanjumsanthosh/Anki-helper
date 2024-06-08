@@ -118,6 +118,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     const [loading, setLoading] = useState(true);
     const [attempts, setAttempts] = useState(0);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+    const [redirectOnce, setRedirectOnce] = useState(false);
 
 
     const refs = useRef<{ [key: string]: React.RefObject<any> }>({});
@@ -154,7 +155,10 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         });
         if (gotoID && refs.current[gotoID] && refs.current[gotoID].current) {
             Logger.info(LOGGER_TAG, `Scrolling to ${gotoID}`);
-            refs.current[gotoID].current.scrollIntoView({behavior: 'smooth'});
+            if (!redirectOnce) {
+                refs.current[gotoID].current.scrollIntoView({behavior: 'smooth'});
+                setRedirectOnce(true);
+            }
         } else if (gotoID && attempts < 10) {
             // If the ref is not ready and attempts are less than 10, try again after a delay
             Logger.info(LOGGER_TAG, `Retrying to scroll to ${gotoID} attempts: ${attempts}`);

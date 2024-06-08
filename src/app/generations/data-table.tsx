@@ -42,6 +42,7 @@ const emailFormat = (str: string, n: number) => {
     return filterTofirstNChars(str.replace(/(^\w+:|^)\/\//, ''), n);
 }
 
+
 export const columns: ColumnDef<DBRecordType>[] = [
     {
         accessorKey: "id",
@@ -60,7 +61,7 @@ export const columns: ColumnDef<DBRecordType>[] = [
       cell: ({ row }) => {
           const tags = row.getValue("tags") as string;
           return (
-            <div className="flex space-x-2">
+            <div className="flex space-x-2" title={filterTofirstNChars(row.getValue("data"), 150)}>
               {tags && <Badge variant="tag">{tags}</Badge>}
               <span className="max-w-[500px] truncate font-medium">
                 {filterTofirstNChars(row.getValue("data"), 60)}
@@ -108,6 +109,9 @@ export const columns: ColumnDef<DBRecordType>[] = [
               {row.getValue("read") ? "✅" : "❌"}
             </div>
         ),
+        filterFn: (row, id, value) => {
+          return value.includes((row.getValue(id) as number).toString())
+        }
     }
 ]
 
