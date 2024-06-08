@@ -32,6 +32,8 @@ import Link from "next/link"
 import { DataTablePagination } from "./data-table-pagination"
 import { DataTableColumnHeader } from "./data-table-column-header"
 import { Badge } from "@/components/ui/badge"
+import { useSearchParams } from 'next/navigation';
+import { Logger } from "@/lib/logger"
 
 
 const filterTofirstNChars = (str: string, n: number) => {
@@ -83,9 +85,11 @@ export const columns: ColumnDef<DBRecordType>[] = [
       accessorKey: "url",
       header: "URL",
       cell: ({ row }) => 
+        <Link href={row.getValue("url")} target="_blank" passHref>
           <div className="lowercase" title={row.getValue("url")}>
               {emailFormat(row.getValue("url"),20)}
-          </div>,
+          </div>
+        </Link>,
   },
     {
         accessorKey: "tags",
@@ -120,14 +124,19 @@ interface GeneratedDataTableProps {
 }
 
 export function GeneratedDataTable({getServerGenerations}: GeneratedDataTableProps) {
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({date: false, tags: false})
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [{"id": "read","value": ["0"]}])
-  const [sorting, setSorting] = React.useState<SortingState>([])
+
     const [data, setData] = React.useState<DBRecordType[]>([])
     const [tagList, setTagList] = React.useState<tagListType>([])
+    const searchParam = useSearchParams();
+    const columnSearchParam = tryParseOrDefault(searchParam.get('columnFilters'), '[{"id": "read","value": ["0"]}]');
+    const columnVisibilitySearchParam = tryParseOrDefault(searchParam.get('columnVisibility'), '{"date":false,"tags":false}');
+    const sortingSearchParam = tryParseOrDefault(searchParam.get('sorting'), '[]');
+    const rowSelectionSearchParam = tryParseOrDefault(searchParam.get('rowSelection'), '{}');
+    
+    const [rowSelection, setRowSelection] = React.useState(rowSelectionSearchParam)
+    const [columnVisibility, setColumnVisibility] = React.useState(columnVisibilitySearchParam)
+    const [columnFilters, setColumnFilters] = React.useState(columnSearchParam)
+    const [sorting, setSorting] = React.useState(sortingSearchParam)
 
    const getGenerations = async () => {
         const response = await getServerGenerations();
@@ -143,6 +152,25 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
         getGenerations();
         processTagList();
     }, [])
+
+    React.useEffect(() => {
+      Logger.log("tst",`useEffect called with rowSelection: ${JSON.stringify(rowSelection)}, columnVisibility: ${JSON.stringify(columnVisibility)}, columnFilters: ${JSON.stringify(columnFilters)}, sorting: ${JSON.stringify(sorting)}`);
+      setRowSelection(rowSelection);
+      setColumnVisibility(columnVisibility);
+      setColumnFilters(columnFilters);
+      console.log(JSON.stringify(columnVisibility))
+      setSorting(sorting);
+      const newStateQuery = serializeState({
+        columnFilters: JSON.stringify(columnFilters),
+        columnVisibility: JSON.stringify(columnVisibility),
+        sorting: JSON.stringify(sorting),
+        rowSelection: JSON.stringify(rowSelection),
+      });
+      const newUrl = `${window.location.pathname}?${newStateQuery}`;
+      Logger.log("tst",`newUrl: ${newUrl}`);
+      window.history.replaceState({}, '', newUrl);
+
+    }, [rowSelection, columnVisibility, columnFilters, sorting])
 
 
     const table = useReactTable({
@@ -227,3 +255,17 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
   )
 }
 
+
+function serializeState(state: { [s: string]: string } | ArrayLike<string>) {
+  return Object.entries(state)
+   .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+   .join('&');
+}
+
+function tryParseOrDefault(value: string | null, defaultValue: string) {
+  try {
+    return JSON.parse(value || defaultValue);
+  } catch (e) {
+    return defaultValue;
+  }
+} 
