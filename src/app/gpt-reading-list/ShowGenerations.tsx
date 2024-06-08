@@ -11,8 +11,9 @@ import chroma from "chroma-js";
 import React from 'react';
 import { DBRecordType, tagListType } from '../actions';
 import { useSearchParams } from 'next/navigation';
+import { Logger } from '@/lib/logger';
 
-
+const LOGGER_TAG = 'ShowGenerations';
 
 const optionType = z.object({
     value: z.string(),
@@ -115,6 +116,9 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     const [generations, setGenerations] = useState<DBRecordType[]>([]);
     const [tagList, setTagList] = useState<tagListType>([]);
     const [loading, setLoading] = useState(true);
+    const [attempts, setAttempts] = useState(0);
+    const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+
 
     const refs = useRef<{ [key: string]: React.RefObject<any> }>({});
     
@@ -140,22 +144,39 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         const response = await setServerMarkAsUnread(id);
         getGenerations();
     }
+
     
     useEffect(() => {
         generations.forEach(generation => {
             if (!refs.current[generation.id]) {
                 refs.current[generation.id] = React.createRef();
-            }
+            } 
         });
         if (gotoID && refs.current[gotoID] && refs.current[gotoID].current) {
+            Logger.info(LOGGER_TAG, `Scrolling to ${gotoID}`);
             refs.current[gotoID].current.scrollIntoView({behavior: 'smooth'});
+        } else if (gotoID && attempts < 10) {
+            // If the ref is not ready and attempts are less than 10, try again after a delay
+            Logger.info(LOGGER_TAG, `Retrying to scroll to ${gotoID} attempts: ${attempts}`);
+            setTimer(setTimeout(() => {
+                setAttempts(attempts + 1);
+            }, 500)); // 500ms delay
         }
-    }, [generations, refs, gotoID])
+    }, [generations, refs, gotoID, attempts]);
 
     useEffect(() => {
         getGenerations();
         processTagList();
     }   , [gotoID])
+
+    useEffect(() => {
+        return () => {
+            if (timer) {
+                Logger.info(LOGGER_TAG, `Clearing timer`);
+                clearTimeout(timer);
+            }
+        }
+    }, [timer]);
     
 
     if (loading) {
