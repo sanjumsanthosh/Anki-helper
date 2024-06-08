@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { LegacyRef, useEffect, useRef, useState } from 'react';
+import { LegacyRef, useCallback, useEffect, useRef, useState } from 'react';
 import {z} from 'zod';
 import ReactMarkdown from 'react-markdown';
 import Link from 'next/link';
@@ -12,6 +12,7 @@ import React from 'react';
 import { DBRecordType, tagListType } from '../actions';
 import { useSearchParams } from 'next/navigation';
 import { Logger } from '@/lib/logger';
+import { toast } from "sonner"
 
 const LOGGER_TAG = 'ShowGenerations';
 
@@ -45,8 +46,8 @@ const getBorderColor = (options: tagListType,tags: string) => {
     const colors = optionsArray.map(option => option.color);
     const mix = chroma.average(colors);
     return mix.css();
-
 }
+
 
 const customStyles: StylesConfig<z.infer<typeof optionType>, true> = {
     control: (styles) => ({ ...styles, backgroundColor: 'transparent',border: 'none', color: '#FFFFFF'}),
@@ -119,7 +120,10 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     const [attempts, setAttempts] = useState(0);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
     const [redirectOnce, setRedirectOnce] = useState(false);
-
+    const [lastScrollY, setLastScrollY] = useState(0);
+    const [lastScrollTime, setLastScrollTime] = useState(Date.now());
+    const toastVisibleUpRef = useRef(false);
+    const toastVisibleDownRef = useRef(false);
 
     const refs = useRef<{ [key: string]: React.RefObject<any> }>({});
     
@@ -181,7 +185,62 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
             }
         }
     }, [timer]);
-    
+
+
+        const onScroll = useCallback(() => {
+            const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+            const currentScrollTime = Date.now();
+
+            const scrollDistance = Math.abs(currentScrollY - lastScrollY);
+            const goingUp = currentScrollY < lastScrollY;
+            const scrollTime = currentScrollTime - lastScrollTime;
+
+            // Calculate speed in pixels per millisecond
+            const scrollSpeed = scrollDistance / scrollTime;
+
+            // If the speed is greater than a certain threshold (e.g., 0.1 pixels/ms), show the toast
+            if (scrollSpeed > 3) {
+                if (goingUp && !toastVisibleUpRef.current) {
+                    toastVisibleUpRef.current = true;
+                    toast("You're scrolling fast upwards!", {
+                        description: "Move to top?",
+                        action: {
+                            label: "Move to top",
+                            onClick: () => {
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                                toastVisibleUpRef.current = false;
+                            }
+                        },
+                        onAutoClose: () => toastVisibleUpRef.current = false,
+                        onDismiss: () => toastVisibleUpRef.current = false
+                    });
+                } else if (!goingUp && !toastVisibleDownRef.current) {
+                    toastVisibleDownRef.current = true;
+                    toast("You're scrolling fast downwards!", {
+                        description: "Move to bottom?",
+                        action: {
+                            label: "Move to bottom",
+                            onClick: () => {
+                                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+                                toastVisibleDownRef.current = false;
+                            }
+                        },
+                        onAutoClose: () => toastVisibleDownRef.current = false,
+                        onDismiss: () => toastVisibleDownRef.current = false
+                    });
+                }
+            }
+
+            setLastScrollY(currentScrollY);
+            setLastScrollTime(currentScrollTime);
+        }, [lastScrollY, lastScrollTime]);
+
+        useEffect(() => {
+            window.addEventListener("scroll", onScroll, { passive: true });
+            return () => {
+                window.removeEventListener("scroll", onScroll);
+            };
+        }, [onScroll]);
 
     if (loading) {
         return <h1>Loading...</h1>

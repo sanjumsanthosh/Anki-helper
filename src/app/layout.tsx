@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Provider } from "@/components/provider";
 import localFont from 'next/font/local'
+import { Toaster } from "@/components/ui/sonner"
 
 
 const myFont = localFont({
@@ -33,6 +34,7 @@ export default function RootLayout({
             {children}
           </main>
         </Provider>
+        <Toaster />
       </body>
     </html>
   );
