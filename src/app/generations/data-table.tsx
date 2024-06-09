@@ -94,8 +94,9 @@ export const columns: ColumnDef<DBRecordType>[] = [
     {
         accessorKey: "tags",
         header: "Tags",
-        filterFn: (row, id, value) => {
-          return value.includes(row.getValue(id))
+        filterFn: (row, id, value: string[]) => {
+          const individualTags = (row.getValue(id) as string).split(',')
+          return individualTags.some((tag) => value.includes(tag))
         },
         cell: ({ row }) => (
             <div className="capitalize">
@@ -139,8 +140,8 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
     const [sorting, setSorting] = React.useState(sortingSearchParam)
 
    const getGenerations = async () => {
-        const response = await getServerGenerations();
-        setData(response);
+      const response = await getServerGenerations();
+      setData(response);
     }
 
     const processTagList = async () => {
@@ -149,12 +150,15 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
   }
 
     React.useEffect(() => {
-        getGenerations();
-        processTagList();
-    }, [])
+        const fetchData = async () => {
+            await processTagList();
+            await getGenerations();
+        };
+
+        fetchData();
+    }, []);
 
     React.useEffect(() => {
-      Logger.log("tst",`useEffect called with rowSelection: ${JSON.stringify(rowSelection)}, columnVisibility: ${JSON.stringify(columnVisibility)}, columnFilters: ${JSON.stringify(columnFilters)}, sorting: ${JSON.stringify(sorting)}`);
       setRowSelection(rowSelection);
       setColumnVisibility(columnVisibility);
       setColumnFilters(columnFilters);
@@ -167,7 +171,6 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
         rowSelection: JSON.stringify(rowSelection),
       });
       const newUrl = `${window.location.pathname}?${newStateQuery}`;
-      Logger.log("tst",`newUrl: ${newUrl}`);
       window.history.replaceState({}, '', newUrl);
 
     }, [rowSelection, columnVisibility, columnFilters, sorting])

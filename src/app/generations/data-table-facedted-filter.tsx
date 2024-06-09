@@ -37,7 +37,22 @@ export function DataTableFacetedFilter<TData, TValue>({
 }: DataTableFacetedFilterProps<TData, TValue>) {
   const facets = column?.getFacetedUniqueValues()
   const selectedValues = new Set(column?.getFilterValue() as string[])
-
+  
+  let facetMap = new Map<string, number>();
+  if(facets){
+    facets.forEach((value, key: string) => {
+        if (typeof key === "string" && typeof value === "number") {
+          const keys = key.split(",");
+          keys.forEach((k) => {
+              if (facetMap.has(k)){
+                  facetMap.set(k, facetMap.get(k)! + value);
+              } else {
+                  facetMap.set(k, value);
+              }
+          });
+        }
+    });
+}
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -116,9 +131,9 @@ export function DataTableFacetedFilter<TData, TValue>({
                       <option.icon className="mr-2 h-4 w-4 text-muted-foreground" />
                     )}
                     <span>{option.label}</span>
-                    {facets?.get(option.value) && (
+                    {facetMap?.get(option.value) && (
                       <span className="ml-auto flex h-4 w-4 items-center justify-center font-mono text-xs">
-                        {facets.get(option.value)}
+                        {facetMap.get(option.value)}
                       </span>
                     )}
                   </CommandItem>

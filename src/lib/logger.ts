@@ -6,24 +6,24 @@ class Logger {
         warn: 'yellow',
         error: 'lightcoral'
     }
-    static log(name: string, message: string) {
-        console.log(`%c[${name}] ${message}`, `color: ${this.color_map.log}`);
+    static log(name: string, ...messages: any[]) {
+        console.log(`%c[${name}]`,  `, color: ${this.color_map.log}`, ...messages);
     }
 
-    static debug(name: string, message: string) {
-        console.debug(`%c[${name}] ${message}`, `color: ${this.color_map.debug}`);
+    static debug(name: string, ...messages: any[]) {
+        console.debug(`%c[${name}]`, `, color: ${this.color_map.debug}`, ...messages);
     }
 
-    static info(name: string, message: string) {
-        console.info(`%c[${name}] ${message}`, `color: ${this.color_map.info}`);
+    static info(name: string, ...messages: any[]) {
+        console.info(`%c[${name}]`, `, color: ${this.color_map.info}`, ...messages);
     }
 
-    static warn(name: string, message: string) {
-        console.warn(`%c[${name}] ${message}`, `color: ${this.color_map.warn}`);
+    static warn(name: string,...messages: any[]) {
+        console.warn(`%c[${name}]`, `, color: ${this.color_map.warn}`, ...messages);
     }
 
-    static error(name: string, message: string) {
-        console.error(`%c[${name}] ${message}`, `color: ${this.color_map.error}`);
+    static error(name: string, ...messages: any[]) {
+        console.error(`%c[${name}]`, `, color: ${this.color_map.error}`, ...messages);
     }
 }
 
