@@ -52,7 +52,7 @@ export const columns: ColumnDef<DBRecordType>[] = [
           <DataTableColumnHeader column={column} title="ID" />
         ),
         cell: ({ row }) => (
-            <Link href={`/gpt-reading-list?id=${row.getValue("id")}`} passHref>
+            <Link href={`/gpt-reading-list?id=${row.getValue("id")}`} target="_blank" passHref>
                 {row.getValue("id")}
             </Link>
         ),
