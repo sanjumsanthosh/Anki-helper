@@ -1,47 +1,71 @@
 'use server';
 
 import { z } from "zod";
-
+import { Post, PrismaClient, Tag } from '@prisma/client';
 // const URL = "http://140.245.24.43:8083";
 const apiEndpoint = process.env.API_ENDPOINT || "http://localhost:8083";
+
+
+const prisma = new PrismaClient();
 
 const getServerURL = (path: string) => {
     return `${apiEndpoint}${path}`;
 }
 
 
-const getServerGenerations = async () => {
+const getServerGenerations = async (): Promise<({tags: Tag[]}&Post)[]> => {
     console.log('getGenerations');
-    const response = await fetch(getServerURL('/db'));
-    const data = await response.json();
-    return data;
+    const generations = await prisma.post.findMany(
+        {
+            include: {
+                tags: true
+            }
+        }
+    );
+    return generations;
 }
 
 
+
 const setServerMarkAsRead = async (id: string) => {
-    const response = await fetch(getServerURL(`/db/mark?id=${id}`), {
+    const generations = await prisma.post.update({
+        where: { id: id },
+        data: { read: true }
     });
 }
 
 const setServerMarkAsUnread = async (id: string) => {
-    const response = await fetch(getServerURL(`/db/mark/unread?id=${id}`), {
+    const generations = await prisma.post.update({
+        where: { id: id },
+        data: { read: false }
     });
 }
 
 
 const updateServerTags = async (id: string, tags: string[]) => {
-    const response = await fetch(getServerURL(`/db/tag?id=${id}&tags=${tags.join(",")}`), {
-        method: "POST"
+    const Tags = tags.map(tag => {
+        return {
+            tag: tag
+        }
+    })
+    const generations = await prisma.post.update({
+        where: { id: id },
+        data: {
+            tags: {
+                set: Tags
+            }
+        }
     });
 }
 
 const cleanAll = async () => {
-    const response = await fetch(getServerURL(`/db/clean`), {
-        method: "DELETE",
-        headers: {
-            "Authorization" : `Bearer ${process.env.API_PASSWORD}`
-        }
-    });
+    // const response = await fetch(getServerURL(`/db/clean`), {
+    //     method: "DELETE",
+    //     headers: {
+    //         "Authorization" : `Bearer ${process.env.API_PASSWORD}`
+    //     }
+    // });
+    const generations = await prisma.post.deleteMany();
 }
 
 
@@ -76,9 +100,28 @@ const DBRecord = z.object({
 
 
 const getStats = async () => {
-    const response = await fetch(getServerURL(`/db/stats`));
-    let data = await response.json();
-    return statType.parse(data);
+    // const response = await fetch(getServerURL(`/db/stats`));
+    // let data = await response.json();
+    // return statType.parse(data);
+    return {
+        rows: {
+            count: 0
+        },
+        readRows: {
+            count: 0
+        },
+        unreadRows: {
+            count: 0
+        },
+        sizeInMB: "0",
+        readRowsButWithTags: {
+            count: 0
+        },
+        readRowsButWithoutTags: {
+            count: 0
+        }
+    
+    }
 }
 
 const tagListType = z.array(z.object({
@@ -92,9 +135,11 @@ const tagListType = z.array(z.object({
 
 
 const getTagList = async () => {
-    const response = await fetch(getServerURL(`/tag`));
-    let data = await response.json();
-    return tagListType.parse(data);
+    // const response = await fetch(getServerURL(`/tag`));
+    // let data = await response.json();
+    // return tagListType.parse(data);
+    const tags = await prisma.tag.findMany();
+    return tags;
 }
 
 

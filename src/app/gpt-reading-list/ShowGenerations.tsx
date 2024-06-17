@@ -13,6 +13,7 @@ import { DBRecordType, tagListType } from '../actions';
 import { useSearchParams } from 'next/navigation';
 import { Logger } from '@/lib/logger';
 import { toast } from "sonner"
+import { Post, Tag } from '@prisma/client';
 
 const LOGGER_TAG = 'ShowGenerations';
 
@@ -22,8 +23,8 @@ const optionType = z.object({
     color: z.string()
 })
 
-const mapExistingTags = (options: tagListType, tags: string) => {
-    const tagsArray = tags.split(',');
+const mapExistingTags = (options: Tag[], tags: Tag[]) => {
+    const tagsArray = tags.map(tag => tag.tag);
     return options.filter(option => tagsArray.includes(option.tag)).map(option => {
         return {
             value: option.tag,
@@ -33,9 +34,8 @@ const mapExistingTags = (options: tagListType, tags: string) => {
     });
 }
 
-const getBorderColor = (options: tagListType,tags: string) => {
-    const tagsArray = tags.split(',');
-    const optionsArray = options.filter(option => tagsArray.includes(option.tag));
+const getBorderColor = (options: Tag[],tags: Tag[]) => {
+    const optionsArray = options.filter(option => tags.map(tag => tag.tag).includes(option.tag));
 
     if (optionsArray.length === 0) {
         return;
@@ -43,9 +43,9 @@ const getBorderColor = (options: tagListType,tags: string) => {
     if (optionsArray.length === 1) {
         return optionsArray[0].color;
     }
-    const colors = optionsArray.map(option => option.color);
+    const colors = optionsArray.map(option => option.color).filter(color => color !== null) as string[];
     const mix = chroma.average(colors);
-    return mix.css();
+    return mix.css() as string;
 }
 
 
@@ -103,19 +103,19 @@ const customStyles: StylesConfig<z.infer<typeof optionType>, true> = {
   };
 
 interface ServerGenerationsType {
-    getServerGenerations: () => Promise<DBRecordType[]>;
+    getServerGenerations: () => Promise<({tags: Tag[]}&Post)[]>;
     setServerMarkAsRead: (id: string) => Promise<void>;
     setServerMarkAsUnread: (id: string) => Promise<void>;
     updateServerTags: (id: string, tags: string[]) => Promise<void>;
-    getTagList: () => Promise<tagListType>;
+    getTagList: () => Promise<Tag[]>;
 }
 
 export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList}: ServerGenerationsType) {
 
     const searchParam = useSearchParams();
     const gotoID = searchParam.get('id');
-    const [generations, setGenerations] = useState<DBRecordType[]>([]);
-    const [tagList, setTagList] = useState<tagListType>([]);
+    const [generations, setGenerations] = useState<({tags: Tag[]}&Post)[]>([]);
+    const [tagList, setTagList] = useState<Tag[]>([]);
     const [loading, setLoading] = useState(true);
     const [attempts, setAttempts] = useState(0);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
@@ -270,14 +270,14 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
 
 function CardWithTags(
     {refer, generation, index, markAsRead, markAsUnread, updateServerTags, tagSelectRef, setGenerations, generations, tagList}:
-     {refer: LegacyRef<HTMLDivElement>,generation: DBRecordType, index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: DBRecordType[], tagList: tagListType}) {
+     {refer: LegacyRef<HTMLDivElement>,generation: ({tags: Tag[]}&Post), index: number, markAsRead: (id: string) => Promise<void>, markAsUnread: (id: string) => Promise<void>, updateServerTags: (id: string, tags: string[]) => Promise<void>, tagSelectRef: React.RefObject<any>, setGenerations: any, generations: ({tags: Tag[]}&Post)[], tagList: Tag[]}) {
 
 
-    const getBackgroundColor = (read: number) => {
+    const getBackgroundColor = (read: boolean) => {
         return read ? '#140c0c' : 'inherit';
     }
 
-    const getOptions = (tagList: tagListType) => {
+    const getOptions = (tagList: Tag[]) => {
         return tagList.map(tag => {
             return {
                 value: tag.tag,
@@ -287,13 +287,13 @@ function CardWithTags(
         })
     }
     return (
-        <Card ref={refer} key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(tagList, generation.tags),
+        <Card ref={refer} key={index} className={`m-2 py-2 w-full`} style={{borderColor: getBorderColor(tagList, generation.tags) ?? 'inherit',
             background: getBackgroundColor(generation.read)
         }}>
             <CardHeader>
                 <CardTitle>
                     <CardDescription>
-                        <Link href={generation.url} className="text-md sm:text-base md:text-lg w-5" target='_blank'>
+                        <Link href={generation.url ?? ''} className="text-md sm:text-base md:text-lg w-5" target='_blank'>
                             {generation.url}
                         </Link>
                     </CardDescription>
@@ -306,7 +306,7 @@ function CardWithTags(
                             className=" w-full max-w-full
                             overflow-auto leading-tight sm:leading-normal 
                             tracking-tighter sm:tracking-normal whitespace-normal text-xl">
-                            {generation.data}
+                            {generation.content}
                         </ReactMarkdown>
                     </div>
                 </div>
@@ -320,7 +320,7 @@ function CardWithTags(
                         ref={tagSelectRef}
                         isMulti
                         options={getOptions(tagList)}
-                        styles={customStyles}
+                        styles={customStyles as any}
                         isSearchable={false}
                         onChange={(selectedValue) => {
                             updateServerTags(generation.id, selectedValue.map(value => value.value));
@@ -328,7 +328,9 @@ function CardWithTags(
                                 if (generationItem.id === generation.id) {
                                     return {
                                         ...generationItem,
-                                        tags: selectedValue.map(value => value.value).join(',')
+                                        tags: tagList.filter(tag => {
+                                            return selectedValue.map(value => value.value).includes(tag.tag);
+                                        })
                                     }
                                 }
                                 return generationItem;

@@ -34,6 +34,7 @@ import { DataTableColumnHeader } from "./data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { useSearchParams } from 'next/navigation';
 import { Logger } from "@/lib/logger"
+import { Post, Tag } from "@prisma/client"
 
 
 const filterTofirstNChars = (str: string, n: number) => {
@@ -45,7 +46,7 @@ const emailFormat = (str: string, n: number) => {
 }
 
 
-export const columns: ColumnDef<DBRecordType>[] = [
+export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
     {
         accessorKey: "id",
         header: ({ column }) => (
@@ -58,15 +59,15 @@ export const columns: ColumnDef<DBRecordType>[] = [
         ),
     },
     {
-      accessorKey: "data",
+      accessorKey: "content",
       header: "Data",
       cell: ({ row }) => {
-          const tags = row.getValue("tags") as string;
+          const tags = (row.getValue("tags") as Tag[]).map(tag => tag.tag).join(', ')
           return (
-            <div className="flex space-x-2" title={filterTofirstNChars(row.getValue("data"), 150)}>
+            <div className="flex space-x-2" title={filterTofirstNChars(row.getValue("content"), 150)}>
               {tags && <Badge variant="tag">{tags}</Badge>}
               <span className="max-w-[500px] truncate font-medium">
-                {filterTofirstNChars(row.getValue("data"), 60)}
+                {filterTofirstNChars(row.getValue("content"), 60)}
               </span>
             </div>
           )
@@ -84,12 +85,16 @@ export const columns: ColumnDef<DBRecordType>[] = [
     {
       accessorKey: "url",
       header: "URL",
-      cell: ({ row }) => 
-        <Link href={row.getValue("url")} target="_blank" passHref>
-          <div className="lowercase" title={row.getValue("url")}>
-              {emailFormat(row.getValue("url"),20)}
-          </div>
-        </Link>,
+      cell: ({ row }) => {
+        return (
+          <Link href={row.getValue("url")} target="_blank" passHref>
+                    <div className="lowercase" title={row.getValue("url")}>
+                        {emailFormat(row.getValue("url"),20)}
+                    </div>
+          </Link>
+        );
+      }
+        
   },
     {
         accessorKey: "tags",
@@ -121,13 +126,13 @@ export const columns: ColumnDef<DBRecordType>[] = [
 ]
 
 interface GeneratedDataTableProps {
-    getServerGenerations: () => Promise<DBRecordType[]>;
+    getServerGenerations: () => Promise<({tags: Tag[]}&Post)[]>;
 }
 
 export function GeneratedDataTable({getServerGenerations}: GeneratedDataTableProps) {
 
-    const [data, setData] = React.useState<DBRecordType[]>([])
-    const [tagList, setTagList] = React.useState<tagListType>([])
+    const [data, setData] = React.useState<({tags: Tag[]}&Post)[]>([])
+    const [tagList, setTagList] = React.useState<Tag[]>([])
     const searchParam = useSearchParams();
     const columnSearchParam = tryParseOrDefault(searchParam.get('columnFilters'), '[{"id": "read","value": ["0"]}]');
     const columnVisibilitySearchParam = tryParseOrDefault(searchParam.get('columnVisibility'), '{"date":false,"tags":false}');
@@ -162,7 +167,6 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
       setRowSelection(rowSelection);
       setColumnVisibility(columnVisibility);
       setColumnFilters(columnFilters);
-      console.log(JSON.stringify(columnVisibility))
       setSorting(sorting);
       const newStateQuery = serializeState({
         columnFilters: JSON.stringify(columnFilters),
