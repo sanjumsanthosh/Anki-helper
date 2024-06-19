@@ -293,8 +293,8 @@ function CardWithTags(
             <CardHeader>
                 <CardTitle>
                     <CardDescription>
-                        <Link href={generation.url ?? ''} className="text-md sm:text-base md:text-lg w-5" target='_blank'>
-                            {generation.url}
+                        <Link href={generation.url ?? ''} className="text-md sm:text-base md:text-lg w-5" target='_blank' title={generation.url ?? ''}>
+                            {generation.title}
                         </Link>
                     </CardDescription>
                 </CardTitle>
@@ -306,7 +306,7 @@ function CardWithTags(
                             className=" w-full max-w-full
                             overflow-auto leading-tight sm:leading-normal 
                             tracking-tighter sm:tracking-normal whitespace-normal text-xl">
-                            {generation.content}
+                            {decodeURIComponent(escape(atob(generation.content!)))}
                         </ReactMarkdown>
                     </div>
                 </div>
@@ -338,7 +338,7 @@ function CardWithTags(
                         }}
                         value={mapExistingTags(tagList, generation.tags)}
                     />
-                    | {generation.id}
+                    | {generation.id} | {new Date(generation.date).toLocaleString("en-IN", { timeZone: "IST" })}
                 </Label>
                 
                 {

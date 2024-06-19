@@ -62,11 +62,12 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
       header: "Data",
       cell: ({ row }) => {
           const tags = (row.getValue("tags") as Tag[]).map(tag => tag.tag).join(', ')
+          const rawData = decodeURIComponent(escape(atob(row.getValue("content")!)))
           return (
-            <div className="flex space-x-2" title={filterTofirstNChars(row.getValue("content"), 150)}>
+            <div className="flex space-x-2" title={filterTofirstNChars(rawData, 150)}>
               {tags && <Badge variant="tag">{tags}</Badge>}
               <span className="max-w-[500px] truncate font-medium">
-                {filterTofirstNChars(row.getValue("content"), 60)}
+                {filterTofirstNChars(rawData, 60)}
               </span>
             </div>
           )
