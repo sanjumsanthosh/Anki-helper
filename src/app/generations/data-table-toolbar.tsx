@@ -51,8 +51,8 @@ export default function DataTableToolbar({table, tags}: DataTableToolbarProps) {
                 column={table.getColumn("read")}
                 title="Read"
                 options={[
-                  { label: "Read", value: "1" },
-                  { label: "Unread", value: "0" },
+                  { label: "Read", value: "Read" },
+                  { label: "Unread", value: "Unread" },
                 ]}
               />
             )}

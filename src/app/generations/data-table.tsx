@@ -72,7 +72,22 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
             </div>
           )
         },
-  },
+        filterFn: (row, id, value) => {
+            return (value === '' || (row.getValue(id) as string).includes(value) || (row.getValue("title") as string).includes(value));        }
+      },
+    {
+      accessorKey: "title",
+      header: "Title",
+      cell: ({ row }) => {
+        return (
+          <Link href={row.getValue("url")} target="_blank" passHref>
+                    <div className="lowercase" title={row.getValue("url")}>
+                        {row.getValue("title")}
+                    </div>
+          </Link>
+        );
+      }
+    },
     {
         accessorKey: "date",
         header: "Date",
@@ -94,13 +109,12 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
           </Link>
         );
       }
-        
   },
     {
         accessorKey: "tags",
         header: "Tags",
         filterFn: (row, id, value: string[]) => {
-          const individualTags = (row.getValue(id) as string).split(',')
+          const individualTags = (row.getValue(id) as Tag[])?.map(tag => tag.tag) || []
           return individualTags.some((tag) => value.includes(tag))
         },
         cell: ({ row }) => (
@@ -120,7 +134,8 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
             </div>
         ),
         filterFn: (row, id, value) => {
-          return value.includes((row.getValue(id) as number).toString())
+          Logger.log(row.getValue(id), value)
+          return value.includes(row.getValue(id) ? "Read" : "Unread") || value.length === 0
         }
     }
 ]
@@ -134,8 +149,8 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
     const [data, setData] = React.useState<({tags: Tag[]}&Post)[]>([])
     const [tagList, setTagList] = React.useState<Tag[]>([])
     const searchParam = useSearchParams();
-    const columnSearchParam = tryParseOrDefault(searchParam.get('columnFilters'), '[{"id": "read","value": ["0"]}]');
-    const columnVisibilitySearchParam = tryParseOrDefault(searchParam.get('columnVisibility'), '{"date":false,"tags":false}');
+    const columnSearchParam = tryParseOrDefault(searchParam.get('columnFilters'), '[{"id": "read","value": []}]');
+    const columnVisibilitySearchParam = tryParseOrDefault(searchParam.get('columnVisibility'), '{"date":false,"tags":false, "url":false}');
     const sortingSearchParam = tryParseOrDefault(searchParam.get('sorting'), '[]');
     const rowSelectionSearchParam = tryParseOrDefault(searchParam.get('rowSelection'), '{}');
     
