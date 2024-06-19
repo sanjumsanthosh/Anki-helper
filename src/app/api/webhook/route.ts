@@ -55,9 +55,5 @@ async function CreateNewRecord(req: NextRequest, res: Response) {
             }
         });
     }
-
-    Response.json({
-        message: 'Record created. Id = ' + record.id,
-        status: 201
-    });
+    return Response.json({ message: 'Record created. Id = ' + record.id },{status: 201});
 }
