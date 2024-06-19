@@ -25,7 +25,7 @@ async function CreateNewRecord(req: NextRequest, res: Response) {
 
     // Validate required fields
     if (!url || !data) {
-        return { message: 'Missing required fields', status: 400 };
+        return Response.json({ message: 'Missing required fields' },{status: 400});
     }
     const searchParams = await req.nextUrl.searchParams;
     const tags = searchParams.get('tags');
