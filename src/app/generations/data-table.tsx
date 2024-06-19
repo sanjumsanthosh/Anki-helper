@@ -33,7 +33,6 @@ import { DataTablePagination } from "./data-table-pagination"
 import { DataTableColumnHeader } from "./data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { useSearchParams } from 'next/navigation';
-import { Logger } from "@/lib/logger"
 import { Post, Tag } from "@prisma/client"
 
 
@@ -134,7 +133,6 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
             </div>
         ),
         filterFn: (row, id, value) => {
-          Logger.log(row.getValue(id), value)
           return value.includes(row.getValue(id) ? "Read" : "Unread") || value.length === 0
         }
     }
