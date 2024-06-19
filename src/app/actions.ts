@@ -2,11 +2,13 @@
 
 import { z } from "zod";
 import { Post, PrismaClient, Tag } from '@prisma/client';
-// const URL = "http://140.245.24.43:8083";
+import { withAccelerate } from '@prisma/extension-accelerate'
+
+
 const apiEndpoint = process.env.API_ENDPOINT || "http://localhost:8083";
 
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient().$extends(withAccelerate());
 
 const getServerURL = (path: string) => {
     return `${apiEndpoint}${path}`;
@@ -19,8 +21,9 @@ const getServerGenerations = async (): Promise<({tags: Tag[]}&Post)[]> => {
         {
             include: {
                 tags: true
-            }
-        }
+            },
+            cacheStrategy: {ttl: 60 },
+        },
     );
     return generations;
 }
@@ -84,7 +87,8 @@ const cleanAllCount = async () => {
             tags: {
                 none: {}
             }
-        }
+        },
+        cacheStrategy: {ttl: 60 }
     });
     return count;
 }

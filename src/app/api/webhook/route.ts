@@ -1,12 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { NextRequest } from 'next/server';
+import { withAccelerate } from '@prisma/extension-accelerate'
 
 export async function POST(req: NextRequest, res: Response) {
     return CreateNewRecord(req, res);
 }
 
 async function CreateNewRecord(req: NextRequest, res: Response) {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient().$extends(withAccelerate());
     const blob = await req.blob();
     let text = (await blob.text()).toString()
     const urlPattern = /"url"\s*:\s*"([^"]*)"/;

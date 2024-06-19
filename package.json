@@ -7,11 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "prismaGenerate": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
-    "@prisma/client": "5.3.1",
+    "@prisma/client": "^5.15.1",
+    "@prisma/extension-accelerate": "^1.1.0",
     "@radix-ui/react-avatar": "^1.0.4",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",

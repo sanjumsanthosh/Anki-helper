@@ -1,5 +1,6 @@
  
 import { PrismaClient } from '@prisma/client';
+import { withAccelerate } from '@prisma/extension-accelerate'
 
 export async function POST(req: Request, res: Response) {
     return CreateNewTag(req, res);
@@ -18,7 +19,7 @@ export async function PUT(req: Request, res: Response) {
 }
 
 async function CreateNewTag(req: Request, res: Response) {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient().$extends(withAccelerate());
     const { tag, additionalJsonDetails, label, color } = await req.json();
     if (!tag || !label || !color) {
         return Response.json({ message: 'Missing required fields' },{status: 400});
@@ -36,13 +37,15 @@ async function CreateNewTag(req: Request, res: Response) {
 }
 
 async function GetAllTags(req: Request, res: Response) {
-    const prisma = new PrismaClient();
-    const tags = await prisma.tag.findMany();
+    const prisma = new PrismaClient().$extends(withAccelerate());
+    const tags = await prisma.tag.findMany({
+        cacheStrategy: {ttl: 60 }
+    });
     return Response.json(tags);
 }
 
 async function DeleteTag(req: Request, res: Response) {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient().$extends(withAccelerate());
     const { tag } = await req.json();
     if (!tag) {
         return Response.json({ message: 'Missing required fields' },{status: 400});
@@ -57,7 +60,7 @@ async function DeleteTag(req: Request, res: Response) {
 }
 
 async function UpdateTag(req: Request, res: Response) {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient().$extends(withAccelerate());
     const { tag, additionalJsonDetails, label, color } = await req.json();
     if (!tag || !label || !color) {
         return Response.json({ message: 'Missing required fields' },{status: 400});

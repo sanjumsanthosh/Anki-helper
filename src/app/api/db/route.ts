@@ -1,6 +1,6 @@
 import { Post, PrismaClient, Tag } from "@prisma/client";
 import { NextRequest } from "next/server";
-
+import { withAccelerate } from '@prisma/extension-accelerate'
 
 export async function GET(req: NextRequest, res: Response) {
     return GetRecords(req, res);
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest, res: Response) {
 
 async function GetRecords(req: NextRequest, res: Response) {
 
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient().$extends(withAccelerate());
 
     const searchParams = await req.nextUrl.searchParams;
     const type = searchParams.get('type');
@@ -30,7 +30,7 @@ async function GetRecords(req: NextRequest, res: Response) {
 }
 
 async function CreateMultipleRecords(req: NextRequest, res: Response) {
-    const prisma = new PrismaClient();
+    const prisma = new PrismaClient().$extends(withAccelerate());
     
     const searchParams = await req.nextUrl.searchParams;
     const type = searchParams.get('type');
