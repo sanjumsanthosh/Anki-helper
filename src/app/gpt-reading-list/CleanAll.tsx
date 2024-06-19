@@ -8,26 +8,35 @@ import { MdCancelPresentation } from "react-icons/md";
 
 interface CleanAllProps {
     cleanAll: () => Promise<void>;
+    cleanAllCount: () => Promise<number>;
 }
-export default function CleanAll({cleanAll}: CleanAllProps) {
+export default function CleanAll({cleanAll, cleanAllCount}: CleanAllProps) {
 
     const [confirm , setConfirm] = useState(false);
+    const [confirmText, setConfirmText] = useState("Clean All" as string | undefined);
 
     const CleanRecords = async() => {
         if(confirm) {
-            console.log("Cleaning all records");
             await cleanAll();
             setConfirm(false);
+            setConfirmText("Clean All");
         } else {
+            const count = await cleanAllCount();
+            setConfirmText(`Clean All (${count}) records?`);
             setConfirm(true);
         }
     }
 
     return (
-        <Button onClick={() => CleanRecords()} variant={"destructive"} className="items-center justify-between">
-            {confirm ? <FaCheck className="mr-2 h-4 w-4" /> : <FaRegTrashAlt className="mr-2 h-4 w-4" /> }
-            {confirm ? "Are you sure?" : "Clean All"}
-            {confirm && <MdCancelPresentation className="ml-5 h-4 w-4" onClick={()=>{setConfirm(false)}}/> }
-        </Button>
+        <div className="flex items-center justify-between">
+            <Button onClick={() => CleanRecords()} variant={"destructive"} className="items-center justify-between">
+                {confirm ? <FaCheck className="mr-2 h-4 w-4" /> : <FaRegTrashAlt className="mr-2 h-4 w-4" />}
+                {confirmText}
+            </Button>
+            {confirm && <MdCancelPresentation className="ml-5 h-4 w-4" onClick={()=>{
+                setConfirm(false);
+                setConfirmText("Clean All");
+            }}/> }
+        </div>
     )
 }

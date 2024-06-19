@@ -199,7 +199,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
             const scrollSpeed = scrollDistance / scrollTime;
 
             // If the speed is greater than a certain threshold (e.g., 0.1 pixels/ms), show the toast
-            if (scrollSpeed > 3) {
+            if (scrollSpeed > 9) {
                 if (goingUp && !toastVisibleUpRef.current) {
                     toastVisibleUpRef.current = true;
                     toast("You're scrolling fast upwards!", {

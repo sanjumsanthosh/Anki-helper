@@ -65,7 +65,28 @@ const cleanAll = async () => {
     //         "Authorization" : `Bearer ${process.env.API_PASSWORD}`
     //     }
     // });
-    const generations = await prisma.post.deleteMany();
+    // delete posts where read is true and tags is empty
+    // return back number of rows deleted
+    const generations = await prisma.post.deleteMany({
+        where: {
+            read: true,
+            tags: {
+                none: {}
+            }
+        }
+    });
+}
+
+const cleanAllCount = async () => {
+    const count = await prisma.post.count({
+        where: {
+            read: true,
+            tags: {
+                none: {}
+            }
+        }
+    });
+    return count;
 }
 
 
@@ -150,7 +171,8 @@ export {
     updateServerTags,
     cleanAll,
     getStats,
-    getTagList
+    getTagList,
+    cleanAllCount
 }
 
 export type statType = z.infer<typeof statType>;
