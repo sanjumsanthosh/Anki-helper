@@ -353,7 +353,7 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore}: {setPostI
             <Button
                 variant="outline"
                 className="h-8 w-8 p-0"
-                onClick={nextPost}
+                onClick={previousPost}
             >
                 <span className="sr-only">Go to previous page</span>
                 <ChevronLeftIcon className="h-4 w-4" />
