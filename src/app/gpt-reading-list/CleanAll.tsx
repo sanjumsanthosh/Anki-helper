@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { usePostStore } from "@/stores/posts";
 import { useState } from "react";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa";
@@ -14,15 +15,17 @@ export default function CleanAll({cleanAll, cleanAllCount}: CleanAllProps) {
 
     const [confirm , setConfirm] = useState(false);
     const [confirmText, setConfirmText] = useState("Clean All" as string | undefined);
+    const postStore = usePostStore((state) => state);
+    const count = postStore.posts.filter(post => post.read && post.tags.length === 0).length;
 
     const CleanRecords = async() => {
-        if(confirm) {
-            await cleanAll();
+        if(confirm && count > 0) {
+            postStore.clean();
+            cleanAll();
             setConfirm(false);
             setConfirmText("Clean All");
         } else {
-            const count = await cleanAllCount();
-            setConfirmText(`Clean All (${count}) records?`);
+            setConfirmText(`${count === 0 ? "No" : count} records to clean. ${count === 0 ? "" : "Confirm Clean All"}`);
             setConfirm(true);
         }
     }

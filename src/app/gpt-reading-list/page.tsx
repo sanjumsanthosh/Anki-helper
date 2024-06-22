@@ -2,6 +2,7 @@ import ShowGenerations from "./ShowGenerations";
 import { getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList } from "../actions";
 import Wrapper from "./wrapper";
 import { Suspense } from "react";
+import SingleTileView from "./SingleTileView";
 
 
 export default function GPTReadingList() {
@@ -11,7 +12,7 @@ export default function GPTReadingList() {
             <Wrapper>
                 <div className="mx-auto flex flex-col">
                   <Suspense>
-                    <ShowGenerations 
+                    <SingleTileView 
                         getServerGenerations={getServerGenerations}
                         setServerMarkAsRead={setServerMarkAsRead}
                         setServerMarkAsUnread={setServerMarkAsUnread}

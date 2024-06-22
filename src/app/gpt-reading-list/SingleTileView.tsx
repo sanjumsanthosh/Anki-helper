@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { LegacyRef, useCallback, useEffect, useRef, useState } from 'react';
+import { LegacyRef, use, useCallback, useEffect, useRef, useState } from 'react';
 import {z} from 'zod';
 import Markdown from 'react-markdown';
 import Link from 'next/link';
@@ -11,15 +11,15 @@ import chroma from "chroma-js";
 import React from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Logger } from '@/lib/logger';
-import { toast } from "sonner"
 import { Post, Tag } from '@prisma/client';
 import remarkGfm from 'remark-gfm'
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { usePostStore } from '@/stores/posts';
+import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
 
-const LOGGER_TAG = 'ShowGenerations';
+const LOGGER_TAG = 'SingleTileView';
 
 const optionType = z.object({
     value: z.string(),
@@ -114,7 +114,7 @@ interface ServerGenerationsType {
     getTagList: () => Promise<Tag[]>;
 }
 
-export default function ShowGenerations({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList}: ServerGenerationsType) {
+export default function SingleTileView({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList}: ServerGenerationsType) {
 
     const postStore = usePostStore((state)=>state);
     const searchParam = useSearchParams();
@@ -122,10 +122,8 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     const [attempts, setAttempts] = useState(0);
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
     const [redirectOnce, setRedirectOnce] = useState(false);
-    const [lastScrollY, setLastScrollY] = useState(0);
-    const [lastScrollTime, setLastScrollTime] = useState(Date.now());
-    const toastVisibleUpRef = useRef(false);
-    const toastVisibleDownRef = useRef(false);
+    const [postId, setPostId] = useState('');
+    const [postIndex, setPostIndex] = useState(0);
 
     const refs = useRef<{ [key: string]: React.RefObject<any> }>({});
     
@@ -162,17 +160,11 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         const response = setServerMarkAsUnread(id);
     }
 
-    
     useEffect(() => {
-        postStore.posts.forEach(generation => {
-            if (!refs.current[generation.id]) {
-                refs.current[generation.id] = React.createRef();
-            } 
-        });
-        if (gotoID && refs.current[gotoID] && refs.current[gotoID].current) {
-            Logger.info(LOGGER_TAG, `Scrolling to ${gotoID}`);
-            if (!redirectOnce) {
-                refs.current[gotoID].current.scrollIntoView({behavior: 'smooth'});
+        if (gotoID) {
+            if (!redirectOnce && postStore.posts.length > 0) {
+                setPostId(gotoID);
+                setPostIndex(postStore.posts.findIndex(post => post.id === gotoID));
                 setRedirectOnce(true);
             }
         } else if (gotoID && attempts < 10) {
@@ -182,7 +174,7 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
                 setAttempts(attempts + 1);
             }, 500)); // 500ms delay
         }
-    }, [postStore.posts, refs, gotoID, attempts]);
+    }, [postStore.posts, gotoID, attempts]);
 
     useEffect(() => {
         getGenerations();
@@ -198,97 +190,33 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         }
     }, [timer]);
 
-
-        const onScroll = useCallback(() => {
-            const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-            const currentScrollTime = Date.now();
-
-            const scrollDistance = Math.abs(currentScrollY - lastScrollY);
-            const goingUp = currentScrollY < lastScrollY;
-            const scrollTime = currentScrollTime - lastScrollTime;
-
-            // Calculate speed in pixels per millisecond
-            const scrollSpeed = scrollDistance / scrollTime;
-
-            // If the speed is greater than a certain threshold (e.g., 0.1 pixels/ms), show the toast
-            if (scrollSpeed > 9) {
-                if (goingUp && !toastVisibleUpRef.current) {
-                    toastVisibleUpRef.current = true;
-                    toast("You're scrolling fast upwards!", {
-                        description: "Move to top?",
-                        action: {
-                            label: "Move to top",
-                            onClick: () => {
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                                toastVisibleUpRef.current = false;
-                            }
-                        },
-                        onAutoClose: () => toastVisibleUpRef.current = false,
-                        onDismiss: () => toastVisibleUpRef.current = false
-                    });
-                } else if (!goingUp && !toastVisibleDownRef.current) {
-                    toastVisibleDownRef.current = true;
-                    toast("You're scrolling fast downwards!", {
-                        description: "Move to bottom?",
-                        action: {
-                            label: "Move to bottom",
-                            onClick: () => {
-                                window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-                                toastVisibleDownRef.current = false;
-                            }
-                        },
-                        onAutoClose: () => toastVisibleDownRef.current = false,
-                        onDismiss: () => toastVisibleDownRef.current = false
-                    });
-                }
-            }
-
-            setLastScrollY(currentScrollY);
-            setLastScrollTime(currentScrollTime);
-        }, [lastScrollY, lastScrollTime]);
-
-        useEffect(() => {
-            window.addEventListener("scroll", onScroll, { passive: true });
-            return () => {
-                window.removeEventListener("scroll", onScroll);
-            };
-        }, [onScroll]);
-
-    if (postStore.isPostInitialized === false || postStore.isTagInitialized === false) {
+    if (postStore.isPostInitialized === false || postStore.isTagInitialized === false || postStore.posts[postIndex] === undefined ) {
         return <h1>Loading...</h1>
     }
-
-    // sort generations by read status
-    const sortedGenerations = postStore.posts.sort((a, b) => {
-        if (a.read && !b.read) {
-            return 1;
-        }
-        if (!a.read && b.read) {
-            return -1;
-        }
-        return 0;
-    });
 
     return (
         <div>
             <h1 className="text-2xl">Generations</h1>
-            {sortedGenerations.map((generation, index) => {
-                return <CardWithTags 
-                    refer={refs.current[generation.id]}
-                    key={index}
-                    generation={generation}
-                    index={index}
+            {postStore.posts.length > postIndex && (
+                <>
+                <NavigateNextAndPrevious setPostIndex={setPostIndex} postIndex={postIndex} postStore={postStore} />
+                <CardWithTags 
+                    refer={refs.current[postStore.posts[postIndex].id]}
+                    key={postIndex}
+                    generation={postStore.posts[postIndex]}
+                    index={postIndex}
                     markAsRead={markAsRead}
                     markAsUnread={markAsUnread}
                     updateServerTags={updateServerTagWrapper}
                     tagSelectRef={tagSelectRef}
                     setGenerations={postStore.setPosts}
                     generations={postStore.posts}
-                    tagList={postStore.tags}                            />
-            })}
+                    tagList={postStore.tags} />
+                <NavigateNextAndPrevious setPostIndex={setPostIndex} postIndex={postIndex} postStore={postStore} />
+                </>
+            )}
         </div>
-        
-    )
+    );
 }
 
 function CardWithTags(
@@ -297,7 +225,7 @@ function CardWithTags(
 
 
     const getBackgroundColor = (read: boolean) => {
-        return read ? '#824e4e' : '#000200';
+        return read ? '#2b1e21' : '#000200';
     }
 
     const getOptions = (tagList: Tag[]) => {
@@ -334,17 +262,22 @@ function CardWithTags(
                                   const {children, className, node,ref,  ...rest} = props
                                   const match = /language-(\w+)/.exec(className || '')
                                   return match ? (
-                                    <SyntaxHighlighter
-                                      {...rest}
-                                      PreTag="div"
-                                      language={match[1]}
-                                      style={a11yDark}
-                                    >
-                                        {String(children).replace(/\n$/, '')}
-                                    </SyntaxHighlighter>
+                                    <div className="whitespace-pre-wrap break-words overflow-x-auto">
+                                        <SyntaxHighlighter
+                                            {...rest}
+                                            PreTag="pre"
+                                            wrapLongLines
+                                            wrapLines
+                                            language={match[1]}
+                                            style={a11yDark}
+                                            className={cn(className)}
+                                        >
+                                            {String(children).replace(/\n$/, '')}
+                                        </SyntaxHighlighter>
+                                    </div>
                                   ) : (
-                                    <code {...rest} className={cn("whitespace-normal overflow-auto", className)}>
-                                      {children}
+                                    <code {...rest} className={cn(className, "whitespace-pre-wrap break-words overflow-x-auto")}>
+                                    {children}
                                     </code>
                                   )
                                 }
@@ -393,6 +326,52 @@ function CardWithTags(
         </Card>);
 }
 
+
+function NavigateNextAndPrevious({setPostIndex, postIndex, postStore}: {setPostIndex: (id: number) => void, postIndex: number, postStore: any}) {
+    const nextPost = useCallback(() => {
+        console.log(postIndex, postStore.posts.length);
+        if (postIndex + 1 < postStore.posts.length) {
+            setPostIndex(postIndex + 1);
+        } else {
+            setPostIndex(0);
+        }
+    }, [postIndex, postStore]);
+
+    const previousPost = useCallback(() => {
+        console.log(postIndex, postStore.posts.length);
+        if (postIndex - 1 >= 0) {
+            setPostIndex(postIndex - 1);
+        } else {
+            setPostIndex(postStore.posts.length - 1);
+        }
+    }, [postIndex, postStore]);
+
+    const read = postStore.posts.filter((post: Post) => post.read).length;
+
+    return (
+        <div className="flex justify-between my-5">
+            <Button
+                variant="outline"
+                className="h-8 w-8 p-0"
+                onClick={nextPost}
+            >
+                <span className="sr-only">Go to previous page</span>
+                <ChevronLeftIcon className="h-4 w-4" />
+            </Button>
+            <Label htmlFor="framework" className="mb-2 flex flex-row items-center">
+                {postIndex + 1} of {postStore.posts.length} ({read} read !)
+            </Label>
+            <Button
+                variant="outline"
+                className="h-10 w-10 p-0"
+                onClick={nextPost}
+            >
+              <span className="sr-only">Go to next page</span>
+              <ChevronRightIcon className="h-4 w-4" />
+            </Button>
+        </div>
+    );
+}
 
 export {
     getBorderColor

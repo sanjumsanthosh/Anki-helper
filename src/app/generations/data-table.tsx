@@ -3,9 +3,6 @@
 import * as React from "react"
 import {
   ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
   getCoreRowModel,
   getFacetedRowModel,
@@ -17,6 +14,7 @@ import {
 } from "@tanstack/react-table"
 
 import DataTableToolbar from "./data-table-toolbar"
+import { PostStore, usePostStore } from "@/stores/posts"
 
 
 import {
@@ -34,6 +32,7 @@ import { DataTableColumnHeader } from "./data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { useSearchParams } from 'next/navigation';
 import { Post, Tag } from "@prisma/client"
+import { StoreApi, useStore } from "zustand"
 
 
 const filterTofirstNChars = (str: string, n: number) => {
@@ -52,7 +51,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
           <DataTableColumnHeader column={column} title="ID" />
         ),
         cell: ({ row }) => (
-            <Link href={`/gpt-reading-list?id=${row.getValue("id")}`} target="_blank" passHref>
+            <Link href={`/gpt-reading-list?id=${row.getValue("id")}`} passHref>
                 {row.getValue("id")}
             </Link>
         ),
@@ -80,7 +79,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
       header: "Title",
       cell: ({ row }) => {
         return (
-          <Link href={row.getValue("url")} target="_blank" passHref>
+          <Link href={row.getValue("url")}  passHref>
                     <div className="lowercase" title={row.getValue("url")}>
                         {row.getValue("title")}
                     </div>
@@ -102,7 +101,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
       header: "URL",
       cell: ({ row }) => {
         return (
-          <Link href={row.getValue("url")} target="_blank" passHref>
+          <Link href={row.getValue("url")}  passHref>
                     <div className="lowercase" title={row.getValue("url")}>
                         {emailFormat(row.getValue("url"),20)}
                     </div>
@@ -145,8 +144,8 @@ interface GeneratedDataTableProps {
 
 export function GeneratedDataTable({getServerGenerations}: GeneratedDataTableProps) {
 
-    const [data, setData] = React.useState<({tags: Tag[]}&Post)[]>([])
-    const [tagList, setTagList] = React.useState<Tag[]>([])
+    const postStore = usePostStore((state)=>state);
+
     const searchParam = useSearchParams();
     const columnSearchParam = tryParseOrDefault(searchParam.get('columnFilters'), '[{"id": "read","value": []}]');
     const columnVisibilitySearchParam = tryParseOrDefault(searchParam.get('columnVisibility'), '{"date":false,"tags":false, "url":false}');
@@ -159,13 +158,20 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
     const [sorting, setSorting] = React.useState(sortingSearchParam)
 
    const getGenerations = async () => {
-      const response = await getServerGenerations();
-      setData(response);
+      if (!postStore.isPostInitialized) {
+        const response = await getServerGenerations();
+        postStore.setPosts(response);
+        postStore.setPostInitialized(true);
+      } 
     }
 
     const processTagList = async () => {
-      const response = await getTagList();
-      setTagList(response);
+      if (!postStore.isTagInitialized) {
+        const response = await getTagList();
+        postStore.setTags(response);
+        postStore.setTagInitialized(true);
+      }
+      
   }
 
     React.useEffect(() => {
@@ -195,7 +201,7 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
 
 
     const table = useReactTable({
-      data,
+      data: postStore.posts,
       columns,
       state: {
         sorting,
@@ -219,7 +225,7 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
   return (
     <div className="w-full">
       <div className="flex items-center py-4">
-        <DataTableToolbar table={table} tags={tagList} />
+        <DataTableToolbar table={table} tags={postStore.tags} />
       </div>
       <div className="rounded-md border">
         <Table>
