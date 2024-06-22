@@ -18,6 +18,7 @@ import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { usePostStore } from '@/stores/posts';
 import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
+import { TableStore, useTableStore } from '@/stores/tableState';
 
 const LOGGER_TAG = 'SingleTileView';
 
@@ -117,6 +118,7 @@ interface ServerGenerationsType {
 export default function SingleTileView({getServerGenerations, setServerMarkAsRead, setServerMarkAsUnread, updateServerTags, getTagList}: ServerGenerationsType) {
 
     const postStore = usePostStore((state)=>state);
+    const tableStore = useTableStore((state)=>state);
     const searchParam = useSearchParams();
     const gotoID = searchParam.get('id');
     const [attempts, setAttempts] = useState(0);
@@ -161,11 +163,21 @@ export default function SingleTileView({getServerGenerations, setServerMarkAsRea
     }
 
     useEffect(() => {
-        if (gotoID) {
+        if (gotoID || tableStore.focusedId) {
             if (!redirectOnce && postStore.posts.length > 0) {
-                setPostId(gotoID);
-                setPostIndex(postStore.posts.findIndex(post => post.id === gotoID));
-                setRedirectOnce(true);
+                // if gotoID exist use that. also if its not the same as tableStore.focusedId set it to gotoID
+                // if tableStore.focusedId is set but gotoID is not set, use tableStore.focusedId
+
+                if (gotoID) {
+                    tableStore.setFocusedId(gotoID);
+                    setPostId(gotoID);
+                    setPostIndex(postStore.posts.findIndex(post => post.id === gotoID));
+                    setRedirectOnce(true);
+                } else if (tableStore.focusedId) {
+                    setPostId(tableStore.focusedId);
+                    setPostIndex(postStore.posts.findIndex(post => post.id === tableStore.focusedId));
+                    setRedirectOnce(true);
+                }
             }
         } else if (gotoID && attempts < 10) {
             // If the ref is not ready and attempts are less than 10, try again after a delay
@@ -199,7 +211,7 @@ export default function SingleTileView({getServerGenerations, setServerMarkAsRea
             <h1 className="text-2xl">Generations</h1>
             {postStore.posts.length > postIndex && (
                 <>
-                <NavigateNextAndPrevious setPostIndex={setPostIndex} postIndex={postIndex} postStore={postStore} />
+                <NavigateNextAndPrevious setPostIndex={setPostIndex} postIndex={postIndex} postStore={postStore} tableStore={tableStore} />
                 <CardWithTags 
                     refer={refs.current[postStore.posts[postIndex].id]}
                     key={postIndex}
@@ -212,7 +224,7 @@ export default function SingleTileView({getServerGenerations, setServerMarkAsRea
                     setGenerations={postStore.setPosts}
                     generations={postStore.posts}
                     tagList={postStore.tags} />
-                <NavigateNextAndPrevious setPostIndex={setPostIndex} postIndex={postIndex} postStore={postStore} />
+                <NavigateNextAndPrevious setPostIndex={setPostIndex} postIndex={postIndex} postStore={postStore} tableStore={tableStore} />
                 </>
             )}
         </div>
@@ -327,13 +339,15 @@ function CardWithTags(
 }
 
 
-function NavigateNextAndPrevious({setPostIndex, postIndex, postStore}: {setPostIndex: (id: number) => void, postIndex: number, postStore: any}) {
+function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}: {setPostIndex: (id: number) => void, postIndex: number, postStore: any, tableStore?: TableStore}) {
     const nextPost = useCallback(() => {
         console.log(postIndex, postStore.posts.length);
         if (postIndex + 1 < postStore.posts.length) {
             setPostIndex(postIndex + 1);
+            tableStore?.setFocusedId(postStore.posts[postIndex + 1].id);
         } else {
             setPostIndex(0);
+            tableStore?.setFocusedId(postStore.posts[0].id);
         }
     }, [postIndex, postStore]);
 
@@ -341,8 +355,10 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore}: {setPostI
         console.log(postIndex, postStore.posts.length);
         if (postIndex - 1 >= 0) {
             setPostIndex(postIndex - 1);
+            tableStore?.setFocusedId(postStore.posts[postIndex - 1].id);
         } else {
             setPostIndex(postStore.posts.length - 1);
+            tableStore?.setFocusedId(postStore.posts[postStore.posts.length - 1].id);
         }
     }, [postIndex, postStore]);
 

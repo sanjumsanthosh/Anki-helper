@@ -33,6 +33,7 @@ import { Badge } from "@/components/ui/badge"
 import { useSearchParams } from 'next/navigation';
 import { Post, Tag } from "@prisma/client"
 import { StoreApi, useStore } from "zustand"
+import { useTableStore } from "@/stores/tableState"
 
 
 const filterTofirstNChars = (str: string, n: number) => {
@@ -51,7 +52,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
           <DataTableColumnHeader column={column} title="ID" />
         ),
         cell: ({ row }) => (
-            <Link href={`/gpt-reading-list?id=${row.getValue("id")}`} passHref>
+            <Link href={`/gpt-reading-list?id=${row.getValue("id")}`}  passHref>
                 {row.getValue("id")}
             </Link>
         ),
@@ -79,7 +80,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
       header: "Title",
       cell: ({ row }) => {
         return (
-          <Link href={row.getValue("url")}  passHref>
+          <Link href={row.getValue("url")} target="_blank" passHref>
                     <div className="lowercase" title={row.getValue("url")}>
                         {row.getValue("title")}
                     </div>
@@ -101,7 +102,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
       header: "URL",
       cell: ({ row }) => {
         return (
-          <Link href={row.getValue("url")}  passHref>
+          <Link href={row.getValue("url")} target="_blank" passHref>
                     <div className="lowercase" title={row.getValue("url")}>
                         {emailFormat(row.getValue("url"),20)}
                     </div>
@@ -145,12 +146,23 @@ interface GeneratedDataTableProps {
 export function GeneratedDataTable({getServerGenerations}: GeneratedDataTableProps) {
 
     const postStore = usePostStore((state)=>state);
+    const tableStore = useTableStore((state)=>state);
 
     const searchParam = useSearchParams();
-    const columnSearchParam = tryParseOrDefault(searchParam.get('columnFilters'), '[{"id": "read","value": []}]');
-    const columnVisibilitySearchParam = tryParseOrDefault(searchParam.get('columnVisibility'), '{"date":false,"tags":false, "url":false}');
-    const sortingSearchParam = tryParseOrDefault(searchParam.get('sorting'), '[]');
-    const rowSelectionSearchParam = tryParseOrDefault(searchParam.get('rowSelection'), '{}');
+    const columnSearchParam = tryParseOrDefault(
+      searchParam.get('columnFilters'), 
+      tryParseOrDefault(tableStore.columnSearchParam, '[{"id": "read","value": []}]')
+    );
+    const columnVisibilitySearchParam = tryParseOrDefault(
+      searchParam.get('columnVisibility'), 
+      tryParseOrDefault(tableStore.columnVisibilitySearchParam, '{"date":false,"tags":false, "url":false}')
+    );
+    const sortingSearchParam = tryParseOrDefault(
+      searchParam.get('sorting'),
+      tryParseOrDefault(tableStore.sortingSearchParam,'[]'));
+    const rowSelectionSearchParam = tryParseOrDefault(
+      searchParam.get('rowSelection'), 
+      tryParseOrDefault(tableStore.rowSelectionSearchParam,'{}'));
     
     const [rowSelection, setRowSelection] = React.useState(rowSelectionSearchParam)
     const [columnVisibility, setColumnVisibility] = React.useState(columnVisibilitySearchParam)
@@ -194,6 +206,10 @@ export function GeneratedDataTable({getServerGenerations}: GeneratedDataTablePro
         sorting: JSON.stringify(sorting),
         rowSelection: JSON.stringify(rowSelection),
       });
+      tableStore.setColumnSearchParam(JSON.stringify(columnFilters));
+      tableStore.setColumnVisibilitySearchParam(JSON.stringify(columnVisibility));
+      tableStore.setSortingSearchParam(JSON.stringify(sorting));
+      tableStore.setRowSelectionSearchParam(JSON.stringify(rowSelection));
       const newUrl = `${window.location.pathname}?${newStateQuery}`;
       window.history.replaceState({}, '', newUrl);
 
