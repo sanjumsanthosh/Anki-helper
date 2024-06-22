@@ -14,7 +14,7 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
         >
             <AnkiLogo />
             <MainNav className="mx-6" />
-            <Stats stats={getStats} />
+            {/* <Stats stats={getStats} /> */}
             <CleanAll cleanAll={cleanAll} cleanAllCount={cleanAllCount}/>
         </div>
         </div>

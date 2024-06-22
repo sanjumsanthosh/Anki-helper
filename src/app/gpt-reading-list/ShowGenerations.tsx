@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { LegacyRef, useCallback, useEffect, useRef, useState } from 'react';
 import {z} from 'zod';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'react-markdown';
 import Link from 'next/link';
 import { Label } from '@/components/ui/label';
 import Select, { StylesConfig } from 'react-select'
@@ -14,6 +14,9 @@ import { useSearchParams } from 'next/navigation';
 import { Logger } from '@/lib/logger';
 import { toast } from "sonner"
 import { Post, Tag } from '@prisma/client';
+import remarkGfm from 'remark-gfm'
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 
 const LOGGER_TAG = 'ShowGenerations';
 
@@ -246,10 +249,21 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
         return <h1>Loading...</h1>
     }
 
+    // sort generations by read status
+    const sortedGenerations = generations.sort((a, b) => {
+        if (a.read && !b.read) {
+            return 1;
+        }
+        if (!a.read && b.read) {
+            return -1;
+        }
+        return 0;
+    });
+
     return (
         <div>
             <h1 className="text-2xl">Generations</h1>
-            {generations.map((generation, index) => {
+            {sortedGenerations.map((generation, index) => {
                 return <CardWithTags 
                     refer={refs.current[generation.id]}
                     key={index}
@@ -274,7 +288,7 @@ function CardWithTags(
 
 
     const getBackgroundColor = (read: boolean) => {
-        return read ? '#140c0c' : 'inherit';
+        return read ? '#824e4e' : '#000200';
     }
 
     const getOptions = (tagList: Tag[]) => {
@@ -301,13 +315,33 @@ function CardWithTags(
             </CardHeader>
             <CardContent>
                 <div className="grid items-center gap-2 sm:gap-4">
-                    <div className="flex flex-col space-y-1 sm:space-y-1.5">
-                        <ReactMarkdown 
-                            className=" w-full max-w-full
-                            overflow-auto leading-tight sm:leading-normal 
-                            tracking-tighter sm:tracking-normal whitespace-normal text-xl">
+                    <div className="flex flex-col space-y-1 sm:space-y-1.5 w-100">
+                        <Markdown 
+                            className="tracking-tighter sm:tracking-normal text-xl
+                            whitespace-pre-wrap w-100 break-words"
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                                code(props) {
+                                  const {children, className, node,ref,  ...rest} = props
+                                  const match = /language-(\w+)/.exec(className || '')
+                                  return match ? (
+                                    <SyntaxHighlighter
+                                      {...rest}
+                                      PreTag="div"
+                                      language={match[1]}
+                                      style={a11yDark}
+                                    >
+                                        {String(children).replace(/\n$/, '')}
+                                    </SyntaxHighlighter>
+                                  ) : (
+                                    <code {...rest} className={className}>
+                                      {children}
+                                    </code>
+                                  )
+                                }
+                              }}>
                             {decodeURIComponent(escape(atob(generation.content!)))}
-                        </ReactMarkdown>
+                        </Markdown>
                     </div>
                 </div>
             </CardContent>
