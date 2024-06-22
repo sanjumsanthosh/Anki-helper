@@ -93,7 +93,7 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
         header: "Date",
         cell: ({ row }) => (
             <div className="capitalize">
-                {(row.getValue("date") as string).replace(/T.*/, '')}
+                {(row.getValue("date") as Date).toLocaleDateString()}
             </div>
         ),
     },
