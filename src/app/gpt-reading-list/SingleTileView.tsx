@@ -19,6 +19,7 @@ import { usePostStore } from '@/stores/posts';
 import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
 import { TableStore, useTableStore } from '@/stores/tableState';
+import { useKeyboardShortcut } from '@/hooks/keyboardShortcutHook';
 
 const LOGGER_TAG = 'SingleTileView';
 
@@ -407,6 +408,12 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}
     }, [postIndex, postStore]);
 
     const read = postStore.posts.filter((post: Post) => post.read).length;
+
+
+    useKeyboardShortcut(['ArrowRight'], nextPost);
+    useKeyboardShortcut(['ArrowLeft'], previousPost);
+    useKeyboardShortcut(['ArrowDown'], nextFilteredPost);
+    useKeyboardShortcut(['ArrowUp'], previousFilteredPost);
 
     return (
         <div className="flex justify-between my-5">
