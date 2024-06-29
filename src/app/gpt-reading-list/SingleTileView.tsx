@@ -16,7 +16,7 @@ import remarkGfm from 'remark-gfm'
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { usePostStore } from '@/stores/posts';
-import { ChevronLeftIcon, ChevronRightIcon } from '@radix-ui/react-icons';
+import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
 import { TableStore, useTableStore } from '@/stores/tableState';
 
@@ -339,6 +339,24 @@ function CardWithTags(
 }
 
 
+const findFilteredPreviousIndex = (index: number, posts: Post[]) => {
+    for (let i = index - 1; i >= 0; i--) {
+        if (!posts[i].read) {
+            return i;
+        }
+    }
+    return index - 1;
+}
+
+const findFilteredNextIndex = (index: number, posts: Post[]) => {
+    for (let i = index + 1; i < posts.length; i++) {
+        if (!posts[i].read) {
+            return i;
+        }
+    }
+    return index + 1;
+}
+
 function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}: {setPostIndex: (id: number) => void, postIndex: number, postStore: any, tableStore?: TableStore}) {
     const nextPost = useCallback(() => {
         console.log(postIndex, postStore.posts.length);
@@ -362,29 +380,75 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}
         }
     }, [postIndex, postStore]);
 
+    const nextFilteredPost = useCallback(() => {
+        console.log(postIndex, postStore.posts.length);
+        if (postIndex + 1 < postStore.posts.length) {
+            const nextIndex = findFilteredNextIndex(postIndex, postStore.posts);
+            setPostIndex(nextIndex);
+            tableStore?.setFocusedId(postStore.posts[nextIndex].id);
+        } else {
+            setPostIndex(0);
+            tableStore?.setFocusedId(postStore.posts[0].id);
+        }
+    }, [postIndex, postStore]);
+
+    
+
+    const previousFilteredPost = useCallback(() => {
+        console.log(postIndex, postStore.posts.length);
+        if (postIndex - 1 >= 0) {
+            const prevIndex = findFilteredPreviousIndex(postIndex, postStore.posts);
+            setPostIndex(prevIndex);
+            tableStore?.setFocusedId(postStore.posts[prevIndex].id);
+        } else {
+            setPostIndex(postStore.posts.length - 1);
+            tableStore?.setFocusedId(postStore.posts[postStore.posts.length - 1].id);
+        }
+    }, [postIndex, postStore]);
+
     const read = postStore.posts.filter((post: Post) => post.read).length;
 
     return (
         <div className="flex justify-between my-5">
-            <Button
+            <div className='flex space-x-2'>
+                <Button
                 variant="outline"
-                className="h-8 w-8 p-0"
-                onClick={previousPost}
-            >
-                <span className="sr-only">Go to previous page</span>
-                <ChevronLeftIcon className="h-4 w-4" />
-            </Button>
+                className="h-10 w-10 p-0"
+                onClick={previousFilteredPost}
+                >
+                <span className="sr-only">Go to Previous filtered post</span>
+                <DoubleArrowLeftIcon className="h-4 w-4" />
+                </Button>
+                <Button
+                    variant="outline"
+                    className="h-10 w-10 p-0"
+                    onClick={previousPost}
+                >
+                    <span className="sr-only">Go to previous page</span>
+                    <ChevronLeftIcon className="h-4 w-4" />
+                </Button>
+            </div>
             <Label htmlFor="framework" className="mb-2 flex flex-row items-center">
                 {postIndex + 1} of {postStore.posts.length} ({read} read !)
             </Label>
-            <Button
+            <div className='flex space-x-2'>
+                <Button
+                    variant="outline"
+                    className="h-10 w-10 p-0"
+                    onClick={nextPost}
+                >
+                <span className="sr-only">Go to next page</span>
+                <ChevronRightIcon className="h-4 w-4" />
+                </Button>
+                <Button
                 variant="outline"
                 className="h-10 w-10 p-0"
-                onClick={nextPost}
-            >
-              <span className="sr-only">Go to next page</span>
-              <ChevronRightIcon className="h-4 w-4" />
-            </Button>
+                onClick={nextFilteredPost}
+                >
+                <span className="sr-only">Go to Next filtered post</span>
+                <DoubleArrowRightIcon className="h-4 w-4" />
+                </Button>
+            </div>
         </div>
     );
 }
