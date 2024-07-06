@@ -52,7 +52,7 @@ export default function MermaidViz({ parseAndReturnSerial }: MermaidVizProps) {
 
 
     useEffect(() => {
-        const code = mermaidDiag.render(selectedNodeList, currentNode);
+        const code = mermaidDiag.render(selectedNodeList, currentNode, companionStore.jsonFile);
         generateSVG(code);
         mermaidDiag.setCurrentNode(currentNode);
     }, [currentNode, selectedNodeList, companionStore.dotFile]);
@@ -70,7 +70,7 @@ export default function MermaidViz({ parseAndReturnSerial }: MermaidVizProps) {
     }
 
     useEffect(() => {
-        const code = mermaidDiag.render(selectedNodeList, currentNode);
+        const code = mermaidDiag.render(selectedNodeList, currentNode, companionStore.jsonFile);
         clearAll();
         parseAndReturnSerial(companionStore.dotFile).then((MermaidDiagSerial) => {
             const deserialized = MermaidDiag.deserialize(MermaidDiagSerial);

@@ -279,7 +279,7 @@ class MermaidDiag {
         }
     }
 
-    render(currentNodePath: string[] = [], currentNode?: string) {
+    render(currentNodePath: string[] = [], currentNode?: string, jsonFile: z.infer<typeof AdditionalNodeLvlInfoType> = {}) {
         this.repopulateGraphLists();
 
         const mermaidFlowBuilder = new MermaidFlowBuilder(currentNode);
@@ -303,7 +303,8 @@ class MermaidDiag {
                 for (const edge of toNodes) {
                     const edgeObj = this.mermaidNodeList[edge];
                     if (node === currentNode) {
-                        mermaidFlowBuilder.addNodeIfNotExists(edgeObj.name, "toNodes");
+                        const isGold = (jsonFile[node] && jsonFile[node].description !== undefined);
+                        mermaidFlowBuilder.addNodeIfNotExists(edgeObj.name, "toNodes", isGold);
                         edgeToList.push(mermaidFlowBuilder.addEdge(node, edgeObj.name));
                     } else {
                         mermaidFlowBuilder.addNodeIfNotExists(edgeObj.name);
@@ -323,7 +324,8 @@ class MermaidDiag {
                 for (const edge of fromNodes) {
                     const edgeObj = this.mermaidNodeList[edge];
                     if (node === currentNode) {
-                        mermaidFlowBuilder.addNodeIfNotExists(edgeObj.name, "fromNodes");
+                        const isGold = (jsonFile[node] && jsonFile[node].description !== undefined);
+                        mermaidFlowBuilder.addNodeIfNotExists(edgeObj.name, "fromNodes", isGold);
                         edgeForList.push(mermaidFlowBuilder.addEdge(edgeObj.name, node));
                     } else {
                         mermaidFlowBuilder.addNodeIfNotExists(edgeObj.name);
@@ -333,15 +335,20 @@ class MermaidDiag {
                 }
             }
 
-            mermaidFlowBuilder.addNodeIfNotExists(node, "selectedNodes");
+            const isGold = (jsonFile[node] && jsonFile[node].description !== undefined);
+            mermaidFlowBuilder.addNodeIfNotExists(node, "selectedNodes",isGold);
                 
         }
 
         mermaidFlowBuilder.detent();
         mermaidFlowBuilder.addClassDef("currentNode", "fill:#00ff40,stroke-width:2px;");
+        mermaidFlowBuilder.addClassDef("currentNodeGold", "fill:#00ff40,stroke-width:2px,stroke:#fcbf6d");
         mermaidFlowBuilder.addClassDef("selectedNodes", "fill:#93ff93,stroke-width:2px;stroke-dasharray: 5 5");
+        mermaidFlowBuilder.addClassDef("selectedNodesGold", "fill:#93ff93,stroke-width:2px,stroke-dasharray: 5 5,stroke:#fcbf6d");
         mermaidFlowBuilder.addClassDef("toNodes", "fill:#ffffae,stroke-width:2px;stroke-dasharray: 5 5");
+        mermaidFlowBuilder.addClassDef("toNodesGold", "fill:#ffffae,stroke-width:2px,stroke-dasharray: 5 5,stroke:#fcbf6d");
         mermaidFlowBuilder.addClassDef("fromNodes", "fill:#ffaeae,stroke-width:2px;stroke-dasharray: 5 5");
+        mermaidFlowBuilder.addClassDef("fromNodesGold", "fill:#ffaeae,stroke-width:2px,stroke-dasharray: 5 5,stroke:#fcbf6d");
 
         // linkStyle 0 stroke-width:2px,fill:none,stroke:blue;
         for (let edge of edgeToList) {
@@ -461,9 +468,9 @@ class MermaidFlowBuilder {
         this.output += " ".repeat(this.indentLevel * 4) + text + "\n";
     }
 
-    addNodeIfNotExists(node: string, className?: string) {
+    addNodeIfNotExists(node: string, className?: string, isGold?: boolean) {
         if (this.currentNode && node === this.currentNode) {
-            this.addToOutput(`${node}:::currentNode`);
+            this.addToOutput(`${node}:::currentNode` + (isGold ? "Gold" : ""));
         } else {
             this.addToOutput(`${node}${className ? `:::${className}` : ""}`);
         }
