@@ -3,19 +3,19 @@ import Wrapper from "./wrapper";
 import { parseDotFile } from "./graphActions";
 import { MermaidDiag } from "./mermaidDiag";
 import MermaidViz from "./mermaidViz";
-import { Logger } from "@/lib/logger";
 
 export default function MermaidView() {
-    const dotFile = parseDotFile();
-    const mermaidDiag = new MermaidDiag();
-    mermaidDiag.parseGraph(dotFile);
-
     async function parseAndReturnSerial(file: string) {
         "use server"
-        const dotFile = parseDotFile(file);
-        const mermaidDiag = new MermaidDiag();
-        mermaidDiag.parseGraph(dotFile);
-        return mermaidDiag.serialize();
+        try{
+            const dotFile = parseDotFile(file);
+            const mermaidDiag = new MermaidDiag();
+            mermaidDiag.parseGraph(dotFile);
+            return mermaidDiag.serialize();
+        } catch (e) {
+            return {};
+        }
+        
     }
 
 
