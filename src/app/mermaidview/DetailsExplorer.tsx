@@ -107,8 +107,8 @@ function PopupEditableDialogComponent({ k, textarea}: PopupEditableDialogProps) 
         const newValue = ref.current?.value;
         mermaidDiagram.updateOrCreateOverrideAttr({...attr, [k]: newValue});
         const combination = {
-            ...mermaidDiagram.getOverrideJSON(),
-            ANKIConfig: jsonFile.ANKIConfig
+            ...jsonFile,
+            ...mermaidDiagram.getOverrideJSON()
         }
         mermaidDiagram.updateOrCreateOverrideAttr({...attr, [k]: newValue});
         companionStore.connector.saveJSON(companionStore.selectedFile, combination);
@@ -122,8 +122,8 @@ function PopupEditableDialogComponent({ k, textarea}: PopupEditableDialogProps) 
             const newValue = ref.current?.value;
             mermaidDiagram.updateOrCreateOverrideAttr({...attr, [k]: newValue});
             const combination = {
-                ...mermaidDiagram.getOverrideJSON(),
-                ANKIConfig: jsonFile.ANKIConfig
+                ...jsonFile,
+                ...mermaidDiagram.getOverrideJSON()
             } as z.infer<typeof AdditionalNodeLvlInfoType>;
             setJsonFile(combination);
             companionStore.connector.saveJSON(companionStore.selectedFile, combination);
