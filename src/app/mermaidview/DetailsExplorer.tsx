@@ -20,8 +20,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useEffect, useRef, useState } from "react";
 import { useMermaidStore } from "@/stores/mermaidStore";
 import { useCompanionStore } from "@/stores/companionStore";
-import { Logger } from "@/lib/logger";
 import { z } from "zod";
+import React from "react";
 
 interface DetailsExplorerProps {
 }
