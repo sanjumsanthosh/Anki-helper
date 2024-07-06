@@ -31,16 +31,33 @@ const DetailsExplorer = ({}: DetailsExplorerProps) => {
     const {mermaidDiagram, jsonFile} = useMermaidStore(state => ({mermaidDiagram: state.mermaidDiagram, jsonFile: state.jsonFile}));
     const attribute = mermaidDiagram.getAttrOfNode(mermaidDiagram.currentNode, jsonFile);
     let emgithubIframeLink = attribute.emgithubIframeLink;
-    const linkFromLabel = (label: string|undefined) => {
-        if (!label) return '';
-        const paths = label.split('.');
-        return `${jsonFile.GIT_URL}${paths.join('/')}.py`;
+    const linkFromLabel = () => {
+        if (!attribute.label && !attribute.relativePath) return '';
+        let path;
+        let lineNoFrom;
+        let lineNoTo;
+        if (attribute.relativePath) {
+            path = attribute.relativePath;
+            lineNoFrom = attribute.lineNo;
+        } else {
+            path = (attribute.label || "").split('.').join('/')+'.py'
+        }
+
+        let link = `${jsonFile.ANKIConfig?.GIT_URL}${path}`;
+        if (lineNoFrom) {
+            link += `#L${lineNoFrom}`;
+            if (lineNoTo) {
+                link += `-L${lineNoTo}`;
+            }
+        }
+        
+        return link;
     }
     return (
         <Card className="m-5 flex-1">
         <CardHeader>
             <CardTitle>
-                <Link href={linkFromLabel(attribute.label)} passHref target="_blank" className={
+                <Link href={linkFromLabel()} passHref target="_blank" className={
                     cn(buttonVariants({ variant: "link", size: "xl" }), "text-2xl")}>
                     {attribute.label}
                 </Link>
