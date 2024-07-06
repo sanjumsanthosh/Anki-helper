@@ -17,6 +17,10 @@ export function MainNav({
     {
       name: "Table",
       path: "/generations",
+    },
+    {
+      name: "Mermaid",
+      path: "/mermaidview",
     }
   ]
 

@@ -50,7 +50,6 @@ export const usePostStore = create<PostStore>()((set) => ({
         return state;
     }),
     updateServerTags: (id: string, tags: string[]) => set((state) => {
-        console.log("updateServerTags", id, tags);
         const tagsSet = new Set(tags);
         const postIndex = state.posts.findIndex(post => post.id === id);
         if (postIndex !== -1) {

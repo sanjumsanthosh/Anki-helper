@@ -17,7 +17,6 @@ const getServerURL = (path: string) => {
 
 
 const getServerGenerations = async (): Promise<({tags: Tag[]}&Post)[]> => {
-    // Logger.info("Actions|getServerGenerations", "Fetching generations from server" + new Date().toISOString());
     const generations = await prisma.post.findMany(
         {
             include: {
@@ -32,7 +31,6 @@ const getServerGenerations = async (): Promise<({tags: Tag[]}&Post)[]> => {
 
 
 const setServerMarkAsRead = async (id: string) => {
-    // Logger.info("Actions|setServerMarkAsRead", "Marking post as read" + new Date().toISOString());
     const generations = await prisma.post.update({
         where: { id: id },
         data: { read: true }
@@ -40,7 +38,6 @@ const setServerMarkAsRead = async (id: string) => {
 }
 
 const setServerMarkAsUnread = async (id: string) => {
-    // Logger.info("Actions|setServerMarkAsUnread", "Marking post as unread" + new Date().toISOString());
     const generations = await prisma.post.update({
         where: { id: id },
         data: { read: false }
@@ -49,7 +46,6 @@ const setServerMarkAsUnread = async (id: string) => {
 
 
 const updateServerTags = async (id: string, tags: string[]) => {
-    // Logger.info("Actions|updateServerTags", "Updating tags for post" + new Date().toISOString());
     const Tags = tags.map(tag => {
         return {
             tag: tag
@@ -66,15 +62,6 @@ const updateServerTags = async (id: string, tags: string[]) => {
 }
 
 const cleanAll = async () => {
-    // Logger.info("Actions|cleanAll", "Cleaning all posts" + new Date().toISOString());
-    // const response = await fetch(getServerURL(`/db/clean`), {
-    //     method: "DELETE",
-    //     headers: {
-    //         "Authorization" : `Bearer ${process.env.API_PASSWORD}`
-    //     }
-    // });
-    // delete posts where read is true and tags is empty
-    // return back number of rows deleted
     const generations = await prisma.post.deleteMany({
         where: {
             read: true,
@@ -86,7 +73,6 @@ const cleanAll = async () => {
 }
 
 const cleanAllCount = async () => {
-    // Logger.info("Actions|cleanAllCount", "Cleaning all posts count" + new Date().toISOString());
     const count = await prisma.post.count({
         where: {
             read: true,
@@ -131,9 +117,6 @@ const DBRecord = z.object({
 
 
 const getStats = async () => {
-    // const response = await fetch(getServerURL(`/db/stats`));
-    // let data = await response.json();
-    // return statType.parse(data);
     return {
         rows: {
             count: 0
@@ -166,10 +149,6 @@ const tagListType = z.array(z.object({
 
 
 const getTagList = async () => {
-    // Logger.info("Actions|getTagList", "Fetching tags from server" + new Date().toISOString());
-    // const response = await fetch(getServerURL(`/tag`));
-    // let data = await response.json();
-    // return tagListType.parse(data);
     const tags = await prisma.tag.findMany();
     return tags;
 }

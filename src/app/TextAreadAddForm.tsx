@@ -53,12 +53,9 @@ export default function TextAreadAddForm() {
                 setIsValid(true);
                 setStatus(JSON.stringify(notes, null, 2));
             } catch (error) {
-                console.log(typeof error === 'object');
-                console.log(typeof error);
                 if (error instanceof Error) {
                     setStatus(JSON.stringify({error: error.message}, null, 2));
                 } else if (typeof error === 'object') {
-                    console.log(JSON.stringify({error: error||''.toString()}, null, 2));
                     setStatus(JSON.stringify({error: error||''.toString()}, null, 2));
                 } else {
                     setStatus(JSON.stringify({error: "Got error when parsing"}, null, 2));

@@ -18,7 +18,6 @@ export default function SelectDeck({ currentDeck, setDeckInCookies}: DeckProps) 
     useEffect(() => {
         
         if (currentDeck) {
-            console.log(`selecting deck ... ${currentDeck}`)
             selectDeck(currentDeck);
         }
     }, []);

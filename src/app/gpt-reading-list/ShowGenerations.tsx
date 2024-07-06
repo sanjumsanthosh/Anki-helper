@@ -170,14 +170,12 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
             } 
         });
         if (gotoID && refs.current[gotoID] && refs.current[gotoID].current) {
-            Logger.info(LOGGER_TAG, `Scrolling to ${gotoID}`);
             if (!redirectOnce) {
                 refs.current[gotoID].current.scrollIntoView({behavior: 'smooth'});
                 setRedirectOnce(true);
             }
         } else if (gotoID && attempts < 10) {
             // If the ref is not ready and attempts are less than 10, try again after a delay
-            Logger.info(LOGGER_TAG, `Retrying to scroll to ${gotoID} attempts: ${attempts}`);
             setTimer(setTimeout(() => {
                 setAttempts(attempts + 1);
             }, 500)); // 500ms delay
@@ -192,7 +190,6 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     useEffect(() => {
         return () => {
             if (timer) {
-                Logger.info(LOGGER_TAG, `Clearing timer`);
                 clearTimeout(timer);
             }
         }

@@ -182,7 +182,6 @@ export default function SingleTileView({getServerGenerations, setServerMarkAsRea
             }
         } else if (gotoID && attempts < 10) {
             // If the ref is not ready and attempts are less than 10, try again after a delay
-            Logger.info(LOGGER_TAG, `Retrying to scroll to ${gotoID} attempts: ${attempts}`);
             setTimer(setTimeout(() => {
                 setAttempts(attempts + 1);
             }, 500)); // 500ms delay
@@ -197,7 +196,6 @@ export default function SingleTileView({getServerGenerations, setServerMarkAsRea
     useEffect(() => {
         return () => {
             if (timer) {
-                Logger.info(LOGGER_TAG, `Clearing timer`);
                 clearTimeout(timer);
             }
         }
@@ -360,7 +358,6 @@ const findFilteredNextIndex = (index: number, posts: Post[]) => {
 
 function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}: {setPostIndex: (id: number) => void, postIndex: number, postStore: any, tableStore?: TableStore}) {
     const nextPost = useCallback(() => {
-        console.log(postIndex, postStore.posts.length);
         if (postIndex + 1 < postStore.posts.length) {
             setPostIndex(postIndex + 1);
             tableStore?.setFocusedId(postStore.posts[postIndex + 1].id);
@@ -371,7 +368,6 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}
     }, [postIndex, postStore]);
 
     const previousPost = useCallback(() => {
-        console.log(postIndex, postStore.posts.length);
         if (postIndex - 1 >= 0) {
             setPostIndex(postIndex - 1);
             tableStore?.setFocusedId(postStore.posts[postIndex - 1].id);
@@ -382,7 +378,6 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}
     }, [postIndex, postStore]);
 
     const nextFilteredPost = useCallback(() => {
-        console.log(postIndex, postStore.posts.length);
         if (postIndex + 1 < postStore.posts.length) {
             const nextIndex = findFilteredNextIndex(postIndex, postStore.posts);
             setPostIndex(nextIndex);
@@ -396,7 +391,6 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}
     
 
     const previousFilteredPost = useCallback(() => {
-        console.log(postIndex, postStore.posts.length);
         if (postIndex - 1 >= 0) {
             const prevIndex = findFilteredPreviousIndex(postIndex, postStore.posts);
             setPostIndex(prevIndex);

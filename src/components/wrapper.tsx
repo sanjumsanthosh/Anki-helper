@@ -9,7 +9,6 @@ export default function Wrapper({ children }: { children: React.ReactNode }) {
 
     async function setDeckInCookies(deck: string) {
         "use server";
-        console.log("Setting deck in cookies", deck);
         cookies().set("deck", deck);
       }
 

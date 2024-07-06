@@ -30,7 +30,6 @@ class RequestBuilder<T extends AnkiAction> {
     }
 
     async performAction(){
-        console.log(this.action.build());
         try {
             const response = await fetch(this.url, {
                 method: 'POST',
@@ -41,7 +40,6 @@ class RequestBuilder<T extends AnkiAction> {
             });
             if (response.body instanceof ReadableStream) {
                 const text = await new Response(response.body).text();
-                console.log(text); 
                 this.success = true;
                 this.action.parseResponse(text);
             }

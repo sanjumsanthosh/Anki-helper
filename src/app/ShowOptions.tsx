@@ -33,7 +33,7 @@ export default function ShowOptions() {
                 .performAction();
             if (builder.isSuccessful()) {
                 const responseAction = builder.getResponseAction();
-                console.log(responseAction.names); 
+                (responseAction.names); 
                 setDecks(responseAction.names);
                 setStatus(JSON.stringify(responseAction.names));
                 setHealthy(true);
@@ -51,7 +51,6 @@ export default function ShowOptions() {
                 .performAction();
             if (builder.isSuccessful()) {
                 const responseAction = builder.getResponseAction();
-                console.log(responseAction.deckNamesAndIds); 
                 setStatus(JSON.stringify(responseAction.deckNamesAndIds));
             }
         }
@@ -70,7 +69,7 @@ export default function ShowOptions() {
                 .performAction();
             if (builder.isSuccessful()) {
                 const responseAction = builder.getResponseAction();
-                console.log(responseAction.notes); 
+                (responseAction.notes); 
                 setStatus(JSON.stringify(responseAction.notes));
             }
         }catch (error) {
@@ -88,7 +87,6 @@ export default function ShowOptions() {
                 .performAction();
             if (builder.isSuccessful()) {
                 const responseAction = builder.getResponseAction();
-                console.log(responseAction.notes); 
                 action.setNotes(responseAction.notes);
             }
             const notesBuilder = await RequestBuilder.create<NotesInfo>()
@@ -96,7 +94,6 @@ export default function ShowOptions() {
                 .performAction();
             if (notesBuilder.isSuccessful()) {
                 const responseAction = notesBuilder.getResponseAction();
-                console.log(responseAction.getAllNoteInfo());
                 setStatus(JSON.stringify(responseAction.getAllNoteInfo()));
             }
         } catch (error) {
