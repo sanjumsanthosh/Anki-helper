@@ -20,6 +20,7 @@ import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRigh
 import { cn } from '@/lib/utils';
 import { TableStore, useTableStore } from '@/stores/tableState';
 import { useKeyboardShortcut } from '@/hooks/keyboardShortcutHook';
+import readingTime from 'reading-time';
 
 const LOGGER_TAG = 'SingleTileView';
 
@@ -357,6 +358,10 @@ const findFilteredNextIndex = (index: number, posts: Post[]) => {
 }
 
 function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}: {setPostIndex: (id: number) => void, postIndex: number, postStore: any, tableStore?: TableStore}) {
+    const currentPost = decodeURIComponent(escape(atob(postStore.posts[postIndex].content!)));
+
+    const rTime = readingTime(currentPost);
+
     const nextPost = useCallback(() => {
         if (postIndex + 1 < postStore.posts.length) {
             setPostIndex(postIndex + 1);
@@ -430,7 +435,7 @@ function NavigateNextAndPrevious({setPostIndex, postIndex, postStore,tableStore}
                 </Button>
             </div>
             <Label htmlFor="framework" className="mb-2 flex flex-row items-center">
-                {postIndex + 1} of {postStore.posts.length} ({read} read !)
+                {postIndex + 1} of {postStore.posts.length} ({read} read !) - {rTime.text} - {rTime.words} words
             </Label>
             <div className='flex space-x-2'>
                 <Button
