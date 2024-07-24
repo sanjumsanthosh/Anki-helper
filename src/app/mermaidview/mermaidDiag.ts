@@ -506,6 +506,7 @@ const NodeAttrType = z.object({
     systemPath : z.string().optional(),
     relativePath : z.string().optional(),
     lineNo: z.string().optional(),
+    endLineNo: z.string().optional(),
     emgithubIframeLink: z.string().optional(),
     functionInputs: z.array(functionInputs).default([]).describe("Function Inputs with type, description and optional default value as json string").optional(),
     functionOutputs: z.array(functionInputs).default([]).describe("Function Outputs with type, description and optional default value as json string").optional(),

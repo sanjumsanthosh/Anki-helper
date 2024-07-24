@@ -39,6 +39,7 @@ const DetailsExplorer = ({}: DetailsExplorerProps) => {
         if (attribute.relativePath) {
             path = attribute.relativePath;
             lineNoFrom = attribute.lineNo;
+            lineNoTo = attribute.endLineNo;
         } else {
             path = (attribute.label || "").split('.').join('/')+'.py'
         }
@@ -62,7 +63,7 @@ const DetailsExplorer = ({}: DetailsExplorerProps) => {
                     {attribute.label}
                 </Link>
             </CardTitle>
-            <CardDescription>{attribute.relativePath}:{attribute.lineNo}</CardDescription>
+            <CardDescription>{attribute.relativePath}:{attribute.lineNo}-{attribute.endLineNo}</CardDescription>
         </CardHeader>
         <CardContent>
             <Tabs defaultValue="summary" className="h-full">
