@@ -101,5 +101,7 @@ const CodeSearch = forwardRef(({ selectedNode, setSelectedNode, mermaidDiag, jso
 });
 
 
+CodeSearch.displayName = 'CodeSearch';
+
 
 export default CodeSearch;
