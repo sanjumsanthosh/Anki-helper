@@ -22,6 +22,7 @@ import { useMermaidStore } from "@/stores/mermaidStore";
 import { useCompanionStore } from "@/stores/companionStore";
 import { z } from "zod";
 import React from "react";
+import Iframe from 'react-iframe'
 
 interface DetailsExplorerProps {
     selectedNode: string;
@@ -56,7 +57,7 @@ const DetailsExplorer = ({selectedNode}: DetailsExplorerProps) => {
         return link;
     }
     return (
-        <Card className="m-5 flex-1">
+        <Card className="flex-1">
         <CardHeader>
             <CardTitle>
                 <Link href={linkFromLabel()} passHref target="_blank" className={
@@ -67,7 +68,8 @@ const DetailsExplorer = ({selectedNode}: DetailsExplorerProps) => {
             <CardDescription>{attribute.relativePath}:{attribute.lineNo}-{attribute.endLineNo}</CardDescription>
         </CardHeader>
         <CardContent>
-            {emgithubIframeLink && <iframe className="w-full h-full" allow="clipboard-write" src={attribute.emgithubIframeLink}/>}
+            {emgithubIframeLink && <Iframe  width="100%" height="250px"
+            allow="clipboard-write" url={attribute.emgithubIframeLink!}/>}
             <DetailsFormTable selectedNode={selectedNode}/>
         </CardContent>
         </Card>
@@ -83,7 +85,6 @@ const DetailsFormTable = ({selectedNode}: DetailsFormTableProps) => {
         <div className="flex flex-row gap-4 w-full items-center justify-between">
             <div>
                 <div className="flex flex-col gap-2">
-                <Label>Description</Label>
                 <PopupEditableDialogComponent selectedNode={selectedNode} k={"description"} textarea/>
                 </div>
             </div>

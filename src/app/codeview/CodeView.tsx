@@ -83,9 +83,9 @@ export default function CodeView({ parseAndReturnSerial }: CodeViewProps) {
     }, []);
 
     return (
-        <div className="my-5 w-auto h-full flex flex-col">
-            <div className="justify-around p-5 items-center gap-3">
-                <div className="flex flex-col basis-3/4 grow">
+        <div className="my-1 w-auto h-full flex flex-col">
+            <div className="flex justify-between p-1 items-center gap-3">
+                <div className="w-2/3">
                     <CodeSearch ref={codeSearchRef} selectedNode={selectedNode} setSelectedNode={setSelectedNode}
                     mermaidDiag={mermaidDiag} jsonFile={companionStore.jsonFile} />
                 </div>
