@@ -21,6 +21,10 @@ export function MainNav({
     {
       name: "Mermaid",
       path: "/mermaidview",
+    },
+    {
+      name: "Code View",
+      path: "/codeview",
     }
   ]
 
