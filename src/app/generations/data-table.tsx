@@ -32,7 +32,6 @@ import { DataTableColumnHeader } from "./data-table-column-header"
 import { Badge } from "@/components/ui/badge"
 import { useSearchParams } from 'next/navigation';
 import { Post, Tag } from "@prisma/client"
-import { StoreApi, useStore } from "zustand"
 import { useTableStore } from "@/stores/tableState"
 
 
@@ -73,7 +72,12 @@ export const columns: ColumnDef<({tags: Tag[]}&Post)>[] = [
           )
         },
         filterFn: (row, id, value) => {
-            return (value === '' || (row.getValue(id) as string).includes(value) || (row.getValue("title") as string).includes(value));        }
+            let rawValue = decodeURIComponent(escape(atob(row.getValue(id) as string)))
+            return (
+              value === '' || 
+              rawValue.includes(value) || 
+              (row.getValue("title") as string).includes(value));        
+            }
       },
     {
       accessorKey: "title",
