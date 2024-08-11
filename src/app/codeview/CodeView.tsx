@@ -28,7 +28,9 @@ export default function CodeView({ parseAndReturnSerial }: CodeViewProps) {
     const [selectedNodeList, setSelectedNodeList] = useState(mermaidDiag.getNodeList([]));
     const [currentNode, setCurrentNode] = useState(mermaidDiag.getNodeList([])[0]);
     const companionStore = useMermaidStore(state => state);
-    const [selectedNode, setSelectedNode] = useState(selectedNodeList[0]);
+    const [HistoryNode, setHistoryNode] = useState<string[]>([]);
+    const [FutureNode, setFutureNode] = useState<string>();
+    const selectedNode = HistoryNode.length > 0 ? HistoryNode[HistoryNode.length - 1] : '';
 
     const codeSearchRef = useRef(null);
 
@@ -45,6 +47,29 @@ export default function CodeView({ parseAndReturnSerial }: CodeViewProps) {
         setSelectedNodeList(filteredNodeList);
     }, [bookmarks, companionStore.dotFile]);
 
+    const setSelectedNode = (node: string) => {
+        console.log('setSelectedNode called with node:', node);
+    
+        if (node === '') {
+            console.log('Node is an empty string, returning early.');
+            return;
+        }
+    
+        if (selectedNodeList.includes(node)) {
+            console.log('Node is already in selectedNodeList:', selectedNodeList);
+            const filteredNodeList = selectedNodeList.filter((n) => n !== node);
+            console.log('Filtered node list:', filteredNodeList);
+            setSelectedNodeList([...filteredNodeList, node]);
+            console.log('Updated selectedNodeList:', [...filteredNodeList, node]);
+        } else {
+            console.log('Node is not in selectedNodeList, adding node:', node);
+        }
+    
+        if (!HistoryNode.includes(node)) {
+            setHistoryNode([...HistoryNode, node]);
+        }
+        console.log('Updated HistoryNode:', [...HistoryNode, node]);
+    }
 
     const clearAll = () => {
         setBookmarks([]);
@@ -72,6 +97,24 @@ export default function CodeView({ parseAndReturnSerial }: CodeViewProps) {
                 if (codeSearchRef.current) {
                     (codeSearchRef.current as any).openSelectMenu();
                 }
+            } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                console.log(`Pressed ArrowLeft history.length = ${HistoryNode.length}`);
+                if (history.length > 0) {
+                    const oldNode = HistoryNode.pop();
+                    console.log(`oldNode = ${oldNode}`);
+                    if (oldNode && HistoryNode.length > 0) {
+                        setFutureNode(oldNode);
+                        setSelectedNode(HistoryNode[HistoryNode.length - 1]);
+                    }
+                }
+            } else if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                console.log(`Pressed ArrowRight futureNode = ${FutureNode}`);
+                if (FutureNode) {
+                    setSelectedNode(FutureNode);
+                    setFutureNode(undefined);
+                }
             }
         };
 
@@ -80,7 +123,7 @@ export default function CodeView({ parseAndReturnSerial }: CodeViewProps) {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
+    }, [HistoryNode]);
 
     return (
         <div className="my-1 w-auto h-full flex flex-col">

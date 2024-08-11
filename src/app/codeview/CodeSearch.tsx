@@ -6,7 +6,7 @@ import React, { useEffect, useRef, useImperativeHandle, forwardRef } from "react
 
 interface CodeSearchProps {
     selectedNode: string;
-    setSelectedNode: React.Dispatch<React.SetStateAction<string>>;
+    setSelectedNode: (node: string) => void;
     mermaidDiag: MermaidDiag;
     jsonFile: z.infer<typeof AdditionalNodeLvlInfoType>;
 }
@@ -51,7 +51,6 @@ const CodeSearch = forwardRef(({ selectedNode, setSelectedNode, mermaidDiag, jso
     }
     
     const findOutColor = (node: string) => {
-        // if it the current node then return green color
         if (node === mermaidDiag.currentNode) {
             return chroma('#93ff93');
         } else {
