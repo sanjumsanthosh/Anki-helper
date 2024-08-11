@@ -121,7 +121,6 @@ const DropDownSelector: React.FC<DropDownSelectorProps> = ({ fileList, companion
         options={selectOptions}
         placeholder="Select File"
         theme={(theme) => {
-            console.log('Current theme colors:', theme.colors);
             return {
               ...theme,
               borderRadius: 0,
