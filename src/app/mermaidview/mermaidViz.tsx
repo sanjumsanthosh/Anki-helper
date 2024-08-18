@@ -15,6 +15,12 @@ import { MermaidDiag } from "./mermaidDiag";
 import CompanionConfigurator from "./CompanionConfigurator";
 import { MapInteractionCSS } from 'react-map-interaction';
 
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+  } from "@/components/ui/resizable"
+
 interface MermaidVizProps {
     parseAndReturnSerial: (file: string) => Promise<Record<string, unknown>>;
 }
@@ -178,17 +184,30 @@ export default function MermaidViz({ parseAndReturnSerial }: MermaidVizProps) {
                 <CloseAllExceptCurrentButton currentNode={currentNode} selectedNodeList={selectedNodeList} setSelectedNodeList={setSelectedNodeList} />
                 <CompanionConfigurator />
             </div>
-            <MapInteractionCSS 
-                showControls
-                minScale={1}
-                maxScale={1000}
-                translationBounds={{
-                    xMax: 0,
-                    yMax: 0
-                  }}>
-                <div dangerouslySetInnerHTML={{ __html: svgCode }} />
-            </MapInteractionCSS>
-            <DetailsExplorer/>
+            <ResizablePanelGroup
+                direction="vertical"
+                className="min-h-[200px] max-w rounded-lg border"
+                >
+                <ResizablePanel defaultSize={50}>
+                <div className="w-auto h-[400px]">
+                    <MapInteractionCSS
+                        showControls
+                        minScale={2}
+                        maxScale={1000}
+                        defaultValue={{
+                            scale: 2,
+                            translation: { x: 0, y: 20 }
+                        }}
+                        >
+                        <div dangerouslySetInnerHTML={{ __html: svgCode }} />
+                    </MapInteractionCSS>
+            </div>
+                </ResizablePanel>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={50}>
+                    <DetailsExplorer/>
+                </ResizablePanel>
+            </ResizablePanelGroup>
         </div>
             
     );
