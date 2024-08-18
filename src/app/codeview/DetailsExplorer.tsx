@@ -23,6 +23,11 @@ import { useCompanionStore } from "@/stores/companionStore";
 import { z } from "zod";
 import React from "react";
 import Iframe from 'react-iframe'
+import {
+    ResizableHandle,
+    ResizablePanel,
+    ResizablePanelGroup,
+  } from "@/components/ui/resizable"
 
 interface DetailsExplorerProps {
     selectedNode: string;
@@ -68,9 +73,19 @@ const DetailsExplorer = ({selectedNode}: DetailsExplorerProps) => {
             <CardDescription>{attribute.relativePath}:{attribute.lineNo}-{attribute.endLineNo}</CardDescription>
         </CardHeader>
         <CardContent>
-            {emgithubIframeLink && <Iframe  width="100%" height="250px"
-            allow="clipboard-write" url={attribute.emgithubIframeLink!}/>}
-            <DetailsFormTable selectedNode={selectedNode}/>
+            <ResizablePanelGroup
+                direction="vertical"
+                className="min-h-[700px] h-screen max-w rounded-lg border"
+                >
+                <ResizablePanel defaultSize={25}>
+                    {emgithubIframeLink && <Iframe  width="100%" height="250px"
+                    allow="clipboard-write" url={attribute.emgithubIframeLink!}/>}
+                </ResizablePanel>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={75}>
+                    <DetailsFormTable selectedNode={selectedNode}/>
+                </ResizablePanel>
+            </ResizablePanelGroup>  
         </CardContent>
         </Card>
     );
