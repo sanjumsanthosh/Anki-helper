@@ -13,8 +13,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useMermaidStore } from "@/stores/mermaidStore";
 import { MermaidDiag } from "./mermaidDiag";
 import CompanionConfigurator from "./CompanionConfigurator";
-import { Logger } from "@/lib/logger";
-
+import { MapInteractionCSS } from 'react-map-interaction';
 
 interface MermaidVizProps {
     parseAndReturnSerial: (file: string) => Promise<Record<string, unknown>>;
@@ -179,7 +178,16 @@ export default function MermaidViz({ parseAndReturnSerial }: MermaidVizProps) {
                 <CloseAllExceptCurrentButton currentNode={currentNode} selectedNodeList={selectedNodeList} setSelectedNodeList={setSelectedNodeList} />
                 <CompanionConfigurator />
             </div>
-            <div dangerouslySetInnerHTML={{ __html: svgCode }} />
+            <MapInteractionCSS 
+                showControls
+                minScale={1}
+                maxScale={1000}
+                translationBounds={{
+                    xMax: 0,
+                    yMax: 0
+                  }}>
+                <div dangerouslySetInnerHTML={{ __html: svgCode }} />
+            </MapInteractionCSS>
             <DetailsExplorer/>
         </div>
             
