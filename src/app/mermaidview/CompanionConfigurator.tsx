@@ -16,6 +16,7 @@ import Select from 'react-select'
 
 interface CompanionConfiguratorProps {}
 
+// Component to configure the companion connector
 const CompanionConfigurator = ({}: CompanionConfiguratorProps) => {
 
     const companionStore = useCompanionStore(state => state);
@@ -24,29 +25,41 @@ const CompanionConfigurator = ({}: CompanionConfiguratorProps) => {
     const [attrs, setAttrs] = React.useState<z.infer<typeof AdditionalNodeLvlInfoType>>({});
     const gitRef = React.useRef<HTMLInputElement>(null);
 
+    // Function to check the health of the companion connector
     const checkHealth = async () => {
-        companionStore.connector.checkConnection().then((result) => {
+        try {
+            const result = await companionStore.connector.checkConnection();
             companionStore.setHealthy(result);
-        });
+        } catch (error) {
+            Logger.error("Error checking health", error);
+        }
     }
 
+    // Function to get the list of files from the companion connector
     const getFilesList = async () => {
-        companionStore.connector.listAll().then((result) => {
+        try {
+            const result = await companionStore.connector.listAll();
             setFilesList(result);
-        });
+        } catch (error) {
+            Logger.error("Error getting files list", error);
+        }
     }
 
+    // Function to get and configure the dot and json files from the companion connector
     const getAndConfigureDotAndJson = async () => {
-        const dotFile = await companionStore.connector.getDot(companionStore.selectedFile);
-        const jsonFile = await companionStore.connector.getJSON(companionStore.selectedFile) as z.infer<typeof AdditionalNodeLvlInfoType>;
+        try {
+            const dotFile = await companionStore.connector.getDot(companionStore.selectedFile);
+            const jsonFile = await companionStore.connector.getJSON(companionStore.selectedFile) as z.infer<typeof AdditionalNodeLvlInfoType>;
 
-        
-        Logger.log("Got json file from companion", jsonFile);
-        mermaidStore.mermaidDiagram.parseOverrideAttr(jsonFile);
-        mermaidStore.setJsonFile(jsonFile);
-        mermaidStore.setDotFile(dotFile);
+            Logger.log("Got json file from companion", jsonFile);
+            mermaidStore.mermaidDiagram.parseOverrideAttr(jsonFile);
+            mermaidStore.setJsonFile(jsonFile);
+            mermaidStore.setDotFile(dotFile);
 
-        setAttrs(jsonFile);
+            setAttrs(jsonFile);
+        } catch (error) {
+            Logger.error("Error getting and configuring dot and json files", error);
+        }
     }
 
     useEffect(() => {
@@ -60,19 +73,22 @@ const CompanionConfigurator = ({}: CompanionConfiguratorProps) => {
         getFilesList();
     },[]);
 
+    // Function to sync up configurations with the companion connector
     const syncUpConfigurations = async () => {
-        const gitUrl = gitRef.current?.value;
-        const combination = {
-            ...mermaidStore.mermaidDiagram.getOverrideJSON(),
-            ANKIConfig: {GIT_URL: gitUrl}
-        }
+        try {
+            const gitUrl = gitRef.current?.value;
+            const combination = {
+                ...mermaidStore.mermaidDiagram.getOverrideJSON(),
+                ANKIConfig: {GIT_URL: gitUrl}
+            }
 
-        await companionStore.connector.saveJSON(companionStore.selectedFile, combination);
+            await companionStore.connector.saveJSON(companionStore.selectedFile, combination);
+        } catch (error) {
+            Logger.error("Error syncing up configurations", error);
+        }
     }
 
-
     return (
-        
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline" size="icon">
@@ -92,7 +108,6 @@ const CompanionConfigurator = ({}: CompanionConfiguratorProps) => {
                     <div>
                         <Label>Git URL</Label>
                         <Input defaultValue={attrs.ANKIConfig?.GIT_URL || ""} ref={gitRef} />
-                        
                     </div>
                     <Button onClick={syncUpConfigurations}>Sync</Button>
             </DialogContent>
@@ -100,9 +115,7 @@ const CompanionConfigurator = ({}: CompanionConfiguratorProps) => {
     );
 }
 
-
-// Drop down selector
-
+// Drop down selector component
 interface DropDownSelectorProps {
     fileList: string[];
     companionStore: CompanionStore;
@@ -149,6 +162,6 @@ const DropDownSelector: React.FC<DropDownSelectorProps> = ({ fileList, companion
           }}
       />
     );
-  };
+};
 
 export default CompanionConfigurator;

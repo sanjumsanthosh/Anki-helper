@@ -10,17 +10,17 @@ import { parseAnkiNote } from '@/lib/ankiParser';
 import { AddNotes } from '@/const/ankiActions';
 import { RequestBuilder } from '@/lib/fetchUtils';
 
+// Define the schema for the form
 const FormSchema = z.object({
     text: z.string()
 });
 
-
 export default function TextAreadAddForm() {
-
     const { setStatus , deck } = useCounterStore((state) => state);
     const [isValid, setIsValid] = useState(false);
     const [notes, setNotes] = useState<{ question: string; answer: string; }[]>([]);
 
+    // Initialize the form with default values and validation schema
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -28,25 +28,31 @@ export default function TextAreadAddForm() {
         }
     });
 
+    // Function to handle form submission
     async function onSubmit(data: z.infer<typeof FormSchema>) {
         if (isValid) {
-            const action = AddNotes.createAddNotes();
-            action.setDeckName(deck);
-            notes.forEach(note => {
-                action.addQANotes([{
-                    front: note.question,
-                    back: note.answer
-                }]);
-            });
-            const builder = await RequestBuilder.create<AddNotes>()
-                .setAction(action)
-                .performAction();
-            if (builder.isSuccessful()) {
-                const responseAction = builder.getResponseAction();
-                setStatus(JSON.stringify(responseAction.result));
+            try {
+                const action = AddNotes.createAddNotes();
+                action.setDeckName(deck);
+                notes.forEach(note => {
+                    action.addQANotes([{
+                        front: note.question,
+                        back: note.answer
+                    }]);
+                });
+                const builder = await RequestBuilder.create<AddNotes>()
+                    .setAction(action)
+                    .performAction();
+                if (builder.isSuccessful()) {
+                    const responseAction = builder.getResponseAction();
+                    setStatus(JSON.stringify(responseAction.result));
+                }
+                setIsValid(false);
+                form.reset();
+            } catch (error) {
+                console.error("Error submitting form", error);
+                setStatus(JSON.stringify({error: "Error submitting form"}, null, 2));
             }
-            setIsValid(false);
-            form.reset();
         } else {
             try {
                 setNotes(parseAnkiNote(data.text));
@@ -61,11 +67,10 @@ export default function TextAreadAddForm() {
                     setStatus(JSON.stringify({error: "Got error when parsing"}, null, 2));
                 }
             }
-            
         }
     }
 
-
+    // Function to handle form reset
     const onClear = () => {
         if (isValid) {
             setIsValid(false);
@@ -76,7 +81,6 @@ export default function TextAreadAddForm() {
         setNotes([]);
         setStatus('');
     }
-
 
     return (
         <Form {...form}>

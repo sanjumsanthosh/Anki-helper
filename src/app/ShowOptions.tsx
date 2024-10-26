@@ -17,7 +17,6 @@ const ButtonTableItem = z.object({
     description: z.string()
 })
 
-
 export default function ShowOptions() {
     const {setDecks,setStatus, deck , setHealthy  } = useCounterStore(
         (state) => state,
@@ -25,6 +24,7 @@ export default function ShowOptions() {
 
     const [mode, setMode] = useState(true);
 
+    // Function to get all decks
     const GetAllDecks = async () => {
         try {
             const action = DeckNames.createDeckNames();
@@ -43,6 +43,7 @@ export default function ShowOptions() {
         }
     }
 
+    // Function to get all decks with IDs
     const GetAllDecksWithIds = async () => {
         try {
             const action = DeckNamesAndIds.createDeckNamesAndIds();
@@ -59,7 +60,7 @@ export default function ShowOptions() {
         }
     }
 
-
+    // Function to get all notes
     const GetAllNotes = async () => {
         try {
             const action = FindNotes.createFindNotes();
@@ -77,6 +78,7 @@ export default function ShowOptions() {
         }
     }
 
+    // Function to get note info
     const GetNoteInfo = async () => {
         try {
             const action = NotesInfo.createNotesInfo();
@@ -100,11 +102,11 @@ export default function ShowOptions() {
             console.error(error); 
         }
     }
+
     useEffect(() => {
         GetAllDecks();
     }, [])
 
-    
     const DeckGroup: z.infer<typeof ButtonTableItem>[] = [
         {
             name: "Get All Decks",
