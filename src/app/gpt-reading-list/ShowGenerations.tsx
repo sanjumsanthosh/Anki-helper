@@ -132,34 +132,59 @@ export default function ShowGenerations({getServerGenerations, setServerMarkAsRe
     const tagSelectRef = React.createRef<any>();
 
     const getGenerations = async () => {
-        if(!postStore.isPostInitialized){
-            const response = await getServerGenerations();
-            postStore.setPosts(response);
-            postStore.setPostInitialized(true);
+        try {
+            if(!postStore.isPostInitialized){
+                const response = await getServerGenerations();
+                postStore.setPosts(response);
+                postStore.setPostInitialized(true);
+            }
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error fetching server generations`, error);
+            throw error;
         }
     }
 
     const processTagList = async () => {
-        if (!postStore.isTagInitialized) {
-            const response = await getTagList();
-            postStore.setTags(response);
-            postStore.setTagInitialized(true);
+        try {
+            if (!postStore.isTagInitialized) {
+                const response = await getTagList();
+                postStore.setTags(response);
+                postStore.setTagInitialized(true);
+            }
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error fetching tag list`, error);
+            throw error;
         }
     }
 
     const updateServerTagWrapper = async (id: string, tags: string[]) => {
-        postStore.updateServerTags(id, tags);
-        const response = updateServerTags(id, tags);
+        try {
+            postStore.updateServerTags(id, tags);
+            await updateServerTags(id, tags);
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error updating server tags`, error);
+            throw error;
+        }
     }
 
     const markAsRead = async (id: string) => {
-        postStore.markAsRead(id);
-        const response = setServerMarkAsRead(id);
+        try {
+            postStore.markAsRead(id);
+            await setServerMarkAsRead(id);
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error marking post as read`, error);
+            throw error;
+        }
     }
 
     const markAsUnread = async (id: string) => {
-        postStore.markAsUnread(id);
-        const response = setServerMarkAsUnread(id);
+        try {
+            postStore.markAsUnread(id);
+            await setServerMarkAsUnread(id);
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error marking post as unread`, error);
+            throw error;
+        }
     }
 
     

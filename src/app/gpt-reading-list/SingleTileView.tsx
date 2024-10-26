@@ -13,8 +13,7 @@ import { useSearchParams } from 'next/navigation';
 import { Logger } from '@/lib/logger';
 import { Post, Tag } from '@prisma/client';
 import remarkGfm from 'remark-gfm'
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
-import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { usePostStore } from '@/stores/posts';
 import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
@@ -133,35 +132,65 @@ export default function SingleTileView({getServerGenerations, setServerMarkAsRea
     
     const tagSelectRef = React.createRef<any>();
 
+    // Function to get server generations
     const getGenerations = async () => {
-        if(!postStore.isPostInitialized){
-            const response = await getServerGenerations();
-            postStore.setPosts(response);
-            postStore.setPostInitialized(true);
+        try {
+            if(!postStore.isPostInitialized){
+                const response = await getServerGenerations();
+                postStore.setPosts(response);
+                postStore.setPostInitialized(true);
+            }
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error fetching server generations`, error);
+            throw error;
         }
     }
 
+    // Function to process tag list
     const processTagList = async () => {
-        if (!postStore.isTagInitialized) {
-            const response = await getTagList();
-            postStore.setTags(response);
-            postStore.setTagInitialized(true);
+        try {
+            if (!postStore.isTagInitialized) {
+                const response = await getTagList();
+                postStore.setTags(response);
+                postStore.setTagInitialized(true);
+            }
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error fetching tag list`, error);
+            throw error;
         }
     }
 
+    // Function to update server tags
     const updateServerTagWrapper = async (id: string, tags: string[]) => {
-        postStore.updateServerTags(id, tags);
-        const response = updateServerTags(id, tags);
+        try {
+            postStore.updateServerTags(id, tags);
+            await updateServerTags(id, tags);
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error updating server tags`, error);
+            throw error;
+        }
     }
 
+    // Function to mark a post as read
     const markAsRead = async (id: string) => {
-        postStore.markAsRead(id);
-        const response = setServerMarkAsRead(id);
+        try {
+            postStore.markAsRead(id);
+            await setServerMarkAsRead(id);
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error marking post as read`, error);
+            throw error;
+        }
     }
 
+    // Function to mark a post as unread
     const markAsUnread = async (id: string) => {
-        postStore.markAsUnread(id);
-        const response = setServerMarkAsUnread(id);
+        try {
+            postStore.markAsUnread(id);
+            await setServerMarkAsUnread(id);
+        } catch (error) {
+            Logger.error(`${LOGGER_TAG} - Error marking post as unread`, error);
+            throw error;
+        }
     }
 
     useEffect(() => {
