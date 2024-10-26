@@ -13,7 +13,8 @@ import { useSearchParams } from 'next/navigation';
 import { Logger } from '@/lib/logger';
 import { Post, Tag } from '@prisma/client';
 import remarkGfm from 'remark-gfm'
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter/dist/esm/styles/prism'
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import {a11yDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { usePostStore } from '@/stores/posts';
 import { ChevronLeftIcon, ChevronRightIcon, DoubleArrowLeftIcon, DoubleArrowRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/lib/utils';
