@@ -356,17 +356,22 @@ function CardWithTags(
                                   const {children, className, node,ref,  ...rest} = props
                                   const match = /language-(\w+)/.exec(className || '')
                                   return match ? (
-                                    <SyntaxHighlighter
-                                      {...rest}
-                                      PreTag="div"
-                                      language={match[1]}
-                                      style={a11yDark}
-                                    >
-                                        {String(children).replace(/\n$/, '')}
-                                    </SyntaxHighlighter>
+                                    <div className="whitespace-pre-wrap break-words overflow-x-auto">
+                                        <SyntaxHighlighter
+                                            {...rest}
+                                            PreTag="pre"
+                                            wrapLongLines
+                                            wrapLines
+                                            language={match[1]}
+                                            style={a11yDark}
+                                            className={cn(className)}
+                                        >
+                                            {String(children).replace(/\n$/, '')}
+                                        </SyntaxHighlighter>
+                                    </div>
                                   ) : (
-                                    <code {...rest} className={cn("whitespace-normal overflow-auto", className)}>
-                                      {children}
+                                    <code {...rest} className={cn(className, "whitespace-pre-wrap break-words overflow-x-auto")}>
+                                    {children}
                                     </code>
                                   )
                                 }
